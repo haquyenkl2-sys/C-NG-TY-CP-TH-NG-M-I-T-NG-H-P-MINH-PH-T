@@ -22,7 +22,10 @@ from pathlib import Path
 
 import openpyxl
 from openpyxl.drawing.image import Image as AnhExcel
+from openpyxl.drawing.spreadsheet_drawing import AnchorMarker, OneCellAnchor
+from openpyxl.drawing.xdr import XDRPositiveSize2D
 from openpyxl.styles import Alignment
+from openpyxl.utils.units import pixels_to_EMU
 
 ASSETS = Path(__file__).resolve().parent.parent / "assets"
 MAU = ASSETS / "Mau-bao-gia-goc.xlsx"
@@ -101,15 +104,32 @@ def ap_dung_cong_ty(wb, ct):
         duong_dan_logo = THU_MUC_LOGO / ct["logo"]
         if duong_dan_logo.exists() and ws._images:
             anh = AnhExcel(str(duong_dan_logo))
-            anh.anchor = ws._images[0].anchor
+            # Giữ đúng tỉ lệ ảnh: cao tối đa ~100px (vừa 4 dòng đầu trang), neo ở ô A1
+            cao = 100
+            rong = round(cao * anh.width / anh.height)
+            anh.anchor = OneCellAnchor(_from=AnchorMarker(col=0, colOff=0, row=0, rowOff=pixels_to_EMU(2)),
+                                       ext=XDRPositiveSize2D(pixels_to_EMU(rong), pixels_to_EMU(cao)))
             ws._images = [anh]
     return [k for k, o in O_CONG_TY.items() if "[" in str(ws_ct[o].value or "")]
+
+
+def chinh_co_chu_dau_trang(ws, ct, song_ngu=False):
+    """Địa chỉ dài thì thu nhỏ chữ dòng 2-4 để không tràn sang logo (vùng B:G rộng ~100 ký tự)."""
+    nhan = "Địa chỉ / 地址: " if song_ngu else "Địa chỉ: "
+    dai = _do_dai(nhan + str(ct.get("dia_chi") or ""))
+    if dai > 95:
+        co = max(8, round(10 * 95 / dai, 1))
+        for o in ("B2", "B3", "B4"):
+            f = copy.copy(ws[o].font)
+            f.sz = co
+            ws[o].font = f
 
 
 def tao_mau(ct, duong_dan_ra):
     """Tạo mẫu báo giá trống (giữ 2 dòng ví dụ) mang thông tin của một công ty."""
     wb = openpyxl.load_workbook(MAU)
     con_trong = ap_dung_cong_ty(wb, ct)
+    chinh_co_chu_dau_trang(wb["Báo giá"], ct)
     wb.calculation.fullCalcOnLoad = True
     duong_dan_ra = Path(duong_dan_ra)
     duong_dan_ra.parent.mkdir(parents=True, exist_ok=True)
@@ -498,6 +518,7 @@ def tao(du_lieu, duong_dan_ra):
     rong_ca_trang = sum(ws.column_dimensions[c].width or 10 for c in "ABCDEFG")
     if song_ngu:
         ap_dung_song_ngu(ws, d, du_lieu, ct, tong_cong)
+    chinh_co_chu_dau_trang(ws, ct, song_ngu)
     for r in range(36 + d, 41 + d):
         ws.row_dimensions[r].height = max(18, 13 * _so_dong_chu(ws[f"A{r}"].value, rong_ca_trang) + 4)
 

@@ -168,5 +168,5 @@ Khách công trình thường gửi file Excel bảng khối lượng (có khi s
 ## Ghi chú
 
 - Mẫu có sẵn 12 dòng hàng. Nhiều hơn thì script tự chèn thêm dòng. Dòng có tên dài tự cao lên cho đủ chữ; bảng dài thì báo giá tự chia nhiều trang và lặp lại dòng tiêu đề bảng.
-- Khi người dùng gửi logo thật, lưu đè vào `assets/logo/<ma>.png` (nên là ảnh vuông, nền trong suốt hoặc trắng) và đổi `logo_tam` thành false trong hồ sơ công ty.
+- Khi người dùng gửi logo thật, lưu đè vào `assets/logo/<ma>.png` và đổi `logo_tam` thành false trong hồ sơ công ty. Ảnh chụp màn hình thường có viền tối và nhiều nền thừa: cắt sát nội dung logo (chừa lề nhỏ) để logo hiện to, rõ. Script tự giữ đúng tỉ lệ ảnh (cao ~100px ở góc trên trái), và tự thu nhỏ chữ địa chỉ nếu quá dài để không đè lên logo; vẫn nên xem lại PDF.
 - Khi người dùng muốn **sửa báo giá vừa làm** (đổi giá, thêm hàng...), sửa file JSON rồi chạy lại script. Cách này nhanh hơn và ít lỗi hơn sửa trực tiếp file Excel.
