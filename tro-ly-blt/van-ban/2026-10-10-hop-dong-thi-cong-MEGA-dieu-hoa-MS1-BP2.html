@@ -1,0 +1,283 @@
+<title>Hợp đồng thi công MEGA MS1 &amp; BP2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Sans+SC:wght@400;500;700&display=swap">
+<style>
+/* Layout: one contract sheet on a cool desk tone; drafting notes on top, then the bilingual clauses (Vietnamese line, Chinese line beneath). */
+:root {
+  --desk: #EEF1F6;
+  --sheet: #FFFFFF;
+  --ink: #18202E;
+  --muted: #5B6578;
+  --zh: #3D4A63;
+  --navy: #1F3864;
+  --navy-ink: #FFFFFF;
+  --rule: #D5DCE7;
+  --sub: #F2F4F8;
+  --note: #FFF8DC;
+  --note-edge: #E2C766;
+  --f-vi: "Be Vietnam Pro", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --f-zh: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "Be Vietnam Pro", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --desk: #0D121C; --sheet: #151C2A; --ink: #E5E9F1; --muted: #9AA4B8; --zh: #B9C4D8; --navy: #8FB3E8; --navy-ink: #0D121C;
+  --rule: #2A3447; --sub: #1A2232; --note: #2E2A17; --note-edge: #8A7430; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --desk: #0D121C; --sheet: #151C2A; --ink: #E5E9F1; --muted: #9AA4B8; --zh: #B9C4D8; --navy: #8FB3E8; --navy-ink: #0D121C;
+  --rule: #2A3447; --sub: #1A2232; --note: #2E2A17; --note-edge: #8A7430; color-scheme: dark }
+
+* { box-sizing: border-box; }
+body { background: var(--desk); color: var(--ink); font-family: var(--f-vi); font-size: 15px; line-height: 1.6; padding: 24px 16px 48px; }
+.sheet { max-width: 860px; margin: 0 auto; background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; padding: 40px clamp(16px, 5vw, 56px); display: grid; gap: 28px; }
+.sheet > * { min-width: 0; }
+.zh { font-family: var(--f-zh); color: var(--zh); }
+p { margin: 0; }
+
+.notes { background: var(--note); border: 1px solid var(--note-edge); border-radius: 6px; padding: 16px 18px; display: grid; gap: 10px; font-size: 14px; }
+.notes h2 { margin: 0; font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink); }
+.notes ul { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
+
+.head { text-align: center; display: grid; gap: 4px; }
+.head .nation { font-weight: 700; font-size: 14px; letter-spacing: .02em; }
+.head .motto { font-weight: 600; font-size: 14px; }
+.head .motto::after { content: ""; display: block; width: 120px; height: 1px; background: var(--ink); margin: 8px auto 0; }
+.head h1 { margin: 18px 0 0; font-size: 22px; line-height: 1.3; color: var(--navy); text-wrap: balance; }
+.head h1 .zh { display: block; color: var(--navy); font-size: 18px; }
+.head .no { color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
+
+.meta { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; font-size: 14px; }
+.meta dt { color: var(--muted); }
+.meta dd { margin: 0; min-width: 0; }
+.meta dd span { display: block; }
+@media (max-width: 560px) { .meta { grid-template-columns: 1fr; } .meta dd { margin-bottom: 6px; } }
+
+h3.lbl { margin: 0 0 8px; font-size: 14px; color: var(--navy); }
+ul.basis { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; font-size: 14px; }
+ul.basis span { display: block; }
+
+.tw { overflow-x: auto; border: 1px solid var(--rule); border-radius: 4px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { background: var(--navy); color: var(--navy-ink); font-weight: 600; padding: 8px 10px; text-align: left; vertical-align: top; }
+th .zh { color: var(--navy-ink); opacity: .85; display: block; font-weight: 500; }
+td { padding: 8px 10px; border-top: 1px solid var(--rule); vertical-align: top; }
+td span { display: block; }
+.parties td:first-child { color: var(--muted); white-space: nowrap; }
+.parties { min-width: 560px; }
+.pay { min-width: 620px; }
+
+.art { display: grid; gap: 12px; }
+.art h2 { margin: 0; font-size: 17px; line-height: 1.4; padding-top: 14px; border-top: 1px solid var(--rule); }
+.art h2 .zh { display: block; font-size: 15px; font-weight: 500; }
+.cl { display: grid; gap: 4px; }
+.cl .zh { font-size: 14px; }
+.n { font-weight: 600; font-variant-numeric: tabular-nums; margin-right: 4px; color: var(--navy); }
+
+.sign { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; text-align: center; padding-top: 12px; }
+.sign div { display: grid; gap: 2px; align-content: start; min-height: 180px; }
+.sign b { color: var(--navy); }
+.sign small { color: var(--muted); font-style: italic; }
+.sign .who { margin-top: auto; font-weight: 600; }
+@media (max-width: 560px) { .sign { grid-template-columns: 1fr; } body { padding-inline: 10px; } }
+</style>
+
+<main class="sheet">
+  <section class="notes" aria-label="Ghi chú soạn thảo">
+    <h2>Ghi chú soạn thảo · không in phần này</h2>
+    <p>Hợp đồng soạn theo Bảng báo giá số BG-BLT-2026/[..] ngày 10/10/2026. Chỗ trong ngoặc vuông [ ] là thông tin còn thiếu hoặc con số đề xuất, cần điền hoặc thống nhất với MEGA trước khi ký.</p>
+    <ul>
+      <li><b>Thông tin Bên A:</b> xin MEGA tên pháp lý đầy đủ, địa chỉ, mã số thuế, người đại diện, chức vụ, số tài khoản.</li>
+      <li><b>Thông tin Bên B:</b> điền tên đầy đủ, địa chỉ, mã số thuế, người đại diện, tài khoản của BLT.</li>
+      <li><b>Giá trị hợp đồng:</b> báo giá mới có đơn giá cho 24/406 hạng mục (phần điện phòng máy BP2: 3.379.693.350 đồng, đã gồm dòng thuế 10% theo mẫu MEGA). Điền đủ đơn giá rồi mới ghi được tổng giá trị ở Điều 3.</li>
+      <li><b>Thuế GTGT:</b> MEGA là doanh nghiệp chế xuất (EPE). Dịch vụ xây lắp cho EPE có thể được áp thuế suất 0% nếu đủ điều kiện, trong khi bảng của MEGA ghi “Thuế (10%)”. Cần kế toán xác nhận.</li>
+      <li><b>Tiến độ, tạm ứng, thanh toán, bảo hành, mức phạt:</b> tỷ lệ trong [ ] là mức đề xuất thường gặp.</li>
+      <li><b>Giải quyết tranh chấp:</b> chọn Tòa án hoặc Trọng tài ở Điều 13.</li>
+      <li><b>Rà soát pháp lý:</b> hợp đồng giá trị lớn với doanh nghiệp vốn nước ngoài, nên nhờ luật sư hoặc kế toán đọc lại trước khi ký.</li>
+    </ul>
+  </section>
+
+  <header class="head">
+    <p class="nation">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM<br><span class="zh">越南社会主义共和国</span></p>
+    <p class="motto">Độc lập – Tự do – Hạnh phúc · <span class="zh">独立 – 自由 – 幸福</span></p>
+    <h1>HỢP ĐỒNG THI CÔNG LẮP ĐẶT HỆ THỐNG ĐIỀU HÒA KHÔNG KHÍ <span class="zh">空调系统安装施工合同</span></h1>
+    <p class="no">Số · 合同编号: [..]/2026/HĐTC/MEGA-BLT</p>
+  </header>
+
+  <dl class="meta">
+    <dt>Công trình · 工程名称</dt>
+    <dd><span>Công trình lắp đặt điều hòa không khí MS1 tầng 1 &amp; BP2 – MEGA giai đoạn 1</span><span class="zh">MEGA一期MS1一楼&amp;BP2空调安装工程</span></dd>
+    <dt>Địa điểm · 工程地点</dt>
+    <dd><span>[Địa chỉ nhà máy MEGA]</span><span class="zh">[MEGA工厂地址]</span></dd>
+  </dl>
+
+  <section>
+    <h3 class="lbl">Căn cứ · 依据</h3>
+    <ul class="basis">
+      <li><span>Bộ luật Dân sự số 91/2015/QH13;</span><span class="zh">《民法典》第91/2015/QH13号；</span></li>
+      <li><span>Luật Thương mại số 36/2005/QH11;</span><span class="zh">《商业法》第36/2005/QH11号；</span></li>
+      <li><span>Luật Xây dựng và các văn bản hướng dẫn hiện hành;</span><span class="zh">现行《建筑法》及其实施细则；</span></li>
+      <li><span>Hồ sơ mời thầu, bản vẽ thiết kế của Bên A và Bảng báo giá số BG-BLT-2026/[..] ngày 10/10/2026 của Bên B;</span><span class="zh">甲方招标文件、设计图纸及乙方2026年10月10日第BG-BLT-2026/[..]号报价单；</span></li>
+      <li><span>Nhu cầu và khả năng của hai bên.</span><span class="zh">双方的需求与能力。</span></li>
+    </ul>
+  </section>
+
+  <div class="cl">
+    <p>Hôm nay, ngày [..] tháng [..] năm 2026, tại [địa điểm ký], chúng tôi gồm:</p>
+    <p class="zh">于2026年[..]月[..]日在[签约地点]，双方如下：</p>
+  </div>
+
+  <div class="tw"><table class="parties">
+    <thead><tr><th></th><th>BÊN A · 甲方<span class="zh">Bên giao thầu · 发包方</span></th><th>BÊN B · 乙方<span class="zh">Bên nhận thầu · 承包方</span></th></tr></thead>
+    <tbody>
+      <tr><td>Tên · 名称</td><td>[Tên pháp lý đầy đủ của MEGA]<span class="zh">[MEGA公司全称]</span></td><td>[CÔNG TY TNHH / CỔ PHẦN …] BLT</td></tr>
+      <tr><td>Địa chỉ · 地址</td><td>[...]</td><td>[...]</td></tr>
+      <tr><td>Mã số thuế · 税号</td><td>[...]</td><td>[...]</td></tr>
+      <tr><td>Điện thoại · 电话</td><td>[...]</td><td>[...]</td></tr>
+      <tr><td>Đại diện · 代表人</td><td>Ông/Bà · 先生/女士 [...]</td><td>Ông/Bà · 先生/女士 [...]</td></tr>
+      <tr><td>Chức vụ · 职务</td><td>[...]</td><td>Giám đốc · 总经理</td></tr>
+      <tr><td>Tài khoản · 账号</td><td>[...] tại · 开户行 [...]</td><td>[...] tại · 开户行 [...]</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="cl">
+    <p>Hai bên thống nhất ký kết hợp đồng thi công với các điều khoản sau:</p>
+    <p class="zh">双方经协商一致，签订本施工合同，条款如下：</p>
+  </div>
+
+  <section class="art">
+    <h2>Điều 1. Nội dung công việc<span class="zh">第一条 工作内容</span></h2>
+    <div class="cl"><p><span class="n">1.1.</span>Bên A giao, Bên B nhận cung cấp vật tư, thiết bị, nhân công và thi công lắp đặt hệ thống điều hòa không khí MS1 tầng 1 &amp; BP2 theo Bảng khối lượng và đơn giá (Phụ lục 01), gồm 4 hạng mục: (1) Hệ thống phòng máy lạnh BP2; (2) Hệ thống tự động điều khiển thông minh phòng máy lạnh BP2; (3) Hệ thống thiết bị đầu cuối điều hòa BP2; (4) Hệ thống thiết bị đầu cuối MS1 tầng 1.</p>
+    <p class="zh"><span class="n">1.1.</span>甲方将下列工程发包给乙方，由乙方按《工程量清单与计价表》（附件01）提供材料、设备、人工并完成MS1一楼&amp;BP2空调系统的安装施工，共四个分项：（1）BP2制冷机房系统；（2）BP2制冷机房智能自控系统；（3）BP2空调末端系统；（4）MS1一楼末端系统。</p></div>
+    <div class="cl"><p><span class="n">1.2.</span>Phạm vi gồm: lắp đặt điều hòa trong nhà, đường ống và bảo ôn, máy chính điều hòa, cấp điện cho điều hòa, phòng máy hiệu suất cao và hệ điều khiển; kiểm tra, chạy thử và đào tạo vận hành. Toàn bộ cáp điện là cáp đồng.</p>
+    <p class="zh"><span class="n">1.2.</span>工程范围包括：室内空调安装、管道安装及保温、空调主机安装、空调配电、高效机房及控制；系统调试及操作培训。本项目所有电缆均为铜电缆。</p></div>
+    <div class="cl"><p><span class="n">1.3.</span>Thiết bị tận dụng (chiller CH-01, tháp giải nhiệt cũ) do Bên A bàn giao tại hiện trạng. Bên B chịu trách nhiệm tháo dỡ, vận chuyển (khoảng 30 km) và lắp đặt lại; không chịu trách nhiệm về tình trạng kỹ thuật vốn có của các thiết bị này.</p>
+    <p class="zh"><span class="n">1.3.</span>利旧设备（冷水机组CH-01、旧冷却塔）由甲方按现状移交。乙方负责拆装、搬运（约30公里）及重新安装；对该等设备原有的技术状况不承担责任。</p></div>
+  </section>
+
+  <section class="art">
+    <h2>Điều 2. Chất lượng và thương hiệu vật tư<span class="zh">第二条 质量及材料品牌</span></h2>
+    <div class="cl"><p><span class="n">2.1.</span>Bên B thi công đúng bản vẽ thiết kế được Bên A phê duyệt, quy phạm thi công và tiêu chuẩn kỹ thuật hiện hành.</p>
+    <p class="zh"><span class="n">2.1.</span>乙方应严格按甲方批准的设计图纸、施工规范及现行技术标准进行施工。</p></div>
+    <div class="cl"><p><span class="n">2.2.</span>Thiết bị, vật tư theo Bảng thương hiệu (Phụ lục 02). Thương hiệu ghi “chỉ định, không được thay đổi” phải dùng đúng. Thương hiệu thay thế khác phải được Bên A chấp thuận bằng văn bản trước khi đặt hàng.</p>
+    <p class="zh"><span class="n">2.2.</span>设备、材料按《主要设备材料品牌表》（附件02）执行。标注「指定品牌，不可修改」的品牌不得更改；其他替代品牌须在订货前取得甲方书面同意。</p></div>
+    <div class="cl"><p><span class="n">2.3.</span>Thiết bị chính phải có chứng từ nguồn gốc, chất lượng (CO, CQ) và báo cáo chọn thiết bị của nhà sản xuất. Công việc khuất (ống âm, giá đỡ, bảo ôn) phải được nghiệm thu trước khi che lấp.</p>
+    <p class="zh"><span class="n">2.3.</span>主要设备须提供原产地证明及质量证明（CO、CQ）和厂家选型报告。隐蔽工程（暗埋管、支吊架、保温）须在覆盖前验收。</p></div>
+  </section>
+
+  <section class="art">
+    <h2>Điều 3. Giá trị hợp đồng<span class="zh">第三条 合同价款</span></h2>
+    <div class="cl"><p><span class="n">3.1.</span>Giá trị hợp đồng tạm tính: <b>[...] đồng</b> (Bằng chữ: [...]), theo Bảng báo giá số BG-BLT-2026/[..], chi tiết tại Phụ lục 01.</p>
+    <p class="zh"><span class="n">3.1.</span>合同暂定总价：<b>[...] 越南盾</b>（大写：[...]），依据第BG-BLT-2026/[..]号报价单，明细详见附件01。</p></div>
+    <div class="cl"><p><span class="n">3.2.</span>Hình thức hợp đồng: đơn giá cố định. Đơn giá tổng hợp (vật tư + nhân công) trong Phụ lục 01 không thay đổi trong suốt thời gian thực hiện. Khối lượng quyết toán theo thực tế thi công được hai bên nghiệm thu.</p>
+    <p class="zh"><span class="n">3.2.</span>合同形式：固定单价合同。附件01中的综合单价（材料+人工）在合同履行期间固定不变，工程量按双方验收的实际完成量结算。</p></div>
+    <div class="cl"><p><span class="n">3.3.</span>Khối lượng phát sinh ngoài Phụ lục 01 chỉ được thực hiện khi có biên bản xác nhận của hai bên. Đơn giá phát sinh áp dụng đơn giá trong Phụ lục 01; hạng mục chưa có đơn giá thì hai bên thỏa thuận bằng văn bản.</p>
+    <p class="zh"><span class="n">3.3.</span>附件01以外的增减工程量，须经双方签署确认单后方可实施。变更单价适用附件01单价；附件01中无单价的项目，由双方书面协商确定。</p></div>
+    <div class="cl"><p><span class="n">3.4.</span>Thuế: áp dụng theo quy định pháp luật đối với doanh nghiệp chế xuất tại thời điểm xuất hóa đơn; thuế suất cụ thể: [0% / 10%]. Đồng tiền thanh toán: đồng Việt Nam (VNĐ).</p>
+    <p class="zh"><span class="n">3.4.</span>税金：按开票时越南法律对出口加工企业（EPE）的规定执行，具体税率：[0% / 10%]。结算货币：越南盾（VND）。</p></div>
+  </section>
+
+  <section class="art">
+    <h2>Điều 4. Tạm ứng và thanh toán<span class="zh">第四条 预付款及付款</span></h2>
+    <div class="cl"><p><span class="n">4.1.</span>Bên A tạm ứng và thanh toán cho Bên B theo các đợt sau:</p>
+    <p class="zh"><span class="n">4.1.</span>甲方按下列分期向乙方支付预付款及工程款：</p></div>
+    <div class="tw"><table class="pay">
+      <thead><tr><th>Đợt<span class="zh">期数</span></th><th>Điều kiện<span class="zh">付款条件</span></th><th>Mức thanh toán<span class="zh">付款比例</span></th></tr></thead>
+      <tbody>
+        <tr><td>Tạm ứng<span class="zh">预付款</span></td><td>Sau khi ký hợp đồng [và Bên B nộp bảo lãnh tạm ứng]<span class="zh">合同签订后[并由乙方提交预付款保函]</span></td><td>[30]% giá trị hợp đồng<span class="zh">合同价的[30]%</span></td></tr>
+        <tr><td>Theo tiến độ<span class="zh">进度款</span></td><td>Hàng tháng, theo khối lượng đã nghiệm thu<span class="zh">按月按已验收工程量</span></td><td>[80]% giá trị nghiệm thu, trừ dần tạm ứng tương ứng<span class="zh">验收产值的[80]%，并按比例扣回预付款</span></td></tr>
+        <tr><td>Hoàn thành<span class="zh">竣工款</span></td><td>Nghiệm thu hoàn thành, bàn giao và duyệt quyết toán<span class="zh">竣工验收、移交及结算审核完成</span></td><td>Lũy kế đến [95]% giá trị quyết toán<span class="zh">累计支付至结算价的[95]%</span></td></tr>
+        <tr><td>Bảo hành<span class="zh">质保金</span></td><td>Hết thời hạn bảo hành (hoặc có bảo lãnh bảo hành)<span class="zh">质保期满（或以保修保函替代）</span></td><td>[5]% còn lại<span class="zh">剩余[5]%</span></td></tr>
+      </tbody>
+    </table></div>
+    <div class="cl"><p><span class="n">4.2.</span>Bên A thanh toán trong vòng [15] ngày kể từ ngày nhận đủ hồ sơ hợp lệ: đề nghị thanh toán, biên bản nghiệm thu khối lượng, bảng tính giá trị và hóa đơn theo quy định.</p>
+    <p class="zh"><span class="n">4.2.</span>甲方应在收到乙方完整有效的付款资料后[15]天内付款。付款资料包括：付款申请书、工程量验收记录、产值计算表及合规发票。</p></div>
+    <div class="cl"><p><span class="n">4.3.</span>Hình thức thanh toán: chuyển khoản vào tài khoản của Bên B nêu tại phần mở đầu. Phí ngân hàng bên nào phát sinh bên đó chịu.</p>
+    <p class="zh"><span class="n">4.3.</span>付款方式：银行转账至合同首部所列乙方账户。各方自行承担其一侧产生的银行费用。</p></div>
+  </section>
+
+  <section class="art">
+    <h2>Điều 5. Thời gian thi công<span class="zh">第五条 工期</span></h2>
+    <div class="cl"><p><span class="n">5.1.</span>Khởi công: ngày [..]/[..]/2026, sau khi Bên A bàn giao mặt bằng và thanh toán tạm ứng. Hoàn thành: trong vòng [..] ngày kể từ ngày khởi công. Tiến độ chi tiết tại Phụ lục 03.</p>
+    <p class="zh"><span class="n">5.1.</span>开工日期：2026年[..]月[..]日，以甲方移交施工场地并支付预付款为前提。竣工日期：自开工之日起[..]天内。详细进度见附件03。</p></div>
+    <div class="cl"><p><span class="n">5.2.</span>Thời gian thi công được gia hạn tương ứng khi: Bên A chậm bàn giao mặt bằng, chậm thanh toán hoặc thay đổi thiết kế; thiết bị do Bên A cung cấp về chậm; có khối lượng phát sinh lớn; hoặc xảy ra sự kiện bất khả kháng.</p>
+    <p class="zh"><span class="n">5.2.</span>发生下列情形时，工期相应顺延：甲方延迟移交场地、延迟付款或变更设计；甲供设备延迟到场；发生较大工程量变更；或发生不可抗力事件。</p></div>
+  </section>
+
+  <section class="art">
+    <h2>Điều 6. Quyền và nghĩa vụ của Bên A<span class="zh">第六条 甲方的权利与义务</span></h2>
+    <div class="cl"><p><span class="n">6.1.</span>Bàn giao mặt bằng, bản vẽ thiết kế đã phê duyệt, điểm đấu nối điện, nước thi công và thiết bị tận dụng đúng hạn.</p>
+    <p class="zh"><span class="n">6.1.</span>按时移交施工场地、已批准的设计图纸、施工用水用电接驳点及利旧设备。</p></div>
+    <div class="cl"><p><span class="n">6.2.</span>Cử người giám sát; tổ chức nghiệm thu trong vòng [03] ngày làm việc kể từ khi nhận thông báo mời nghiệm thu của Bên B.</p>
+    <p class="zh"><span class="n">6.2.</span>委派现场监理；在收到乙方验收通知后[03]个工作日内组织验收。</p></div>
+    <div class="cl"><p><span class="n">6.3.</span>Thanh toán đúng, đủ, đúng hạn theo Điều 4. Hướng dẫn Bên B về nội quy nhà máy, an ninh và thủ tục ra vào doanh nghiệp chế xuất.</p>
+    <p class="zh"><span class="n">6.3.</span>按第四条及时足额付款；向乙方告知工厂规章制度、安保要求及出口加工企业出入手续。</p></div>
+  </section>
+
+  <section class="art">
+    <h2>Điều 7. Quyền và nghĩa vụ của Bên B<span class="zh">第七条 乙方的权利与义务</span></h2>
+    <div class="cl"><p><span class="n">7.1.</span>Thi công đúng thiết kế, chất lượng và tiến độ; cử chỉ huy trưởng có năng lực phù hợp thường trực tại công trường.</p>
+    <p class="zh"><span class="n">7.1.</span>按设计、质量及工期要求施工；委派具备相应资质的项目经理常驻现场。</p></div>
+    <div class="cl"><p><span class="n">7.2.</span>Chịu trách nhiệm về an toàn lao động, phòng cháy chữa cháy, vệ sinh môi trường trong phạm vi thi công; mua bảo hiểm cho người lao động theo quy định.</p>
+    <p class="zh"><span class="n">7.2.</span>负责施工范围内的安全生产、消防及环境卫生；按规定为工人购买保险。</p></div>
+    <div class="cl"><p><span class="n">7.3.</span>Báo cáo tiến độ hàng tuần; mời Bên A nghiệm thu từng giai đoạn; lập hồ sơ hoàn công, bản vẽ hoàn công và hướng dẫn vận hành.</p>
+    <p class="zh"><span class="n">7.3.</span>每周提交进度报告；邀请甲方进行阶段验收；编制竣工资料、竣工图及操作说明。</p></div>
+  </section>
+
+  <section class="art">
+    <h2>Điều 8. Nghiệm thu và bàn giao<span class="zh">第八条 验收与移交</span></h2>
+    <div class="cl"><p><span class="n">8.1.</span>Hai bên nghiệm thu công việc khuất, nghiệm thu khối lượng hàng tháng và nghiệm thu hoàn thành sau khi chạy thử hệ thống đạt thông số thiết kế.</p>
+    <p class="zh"><span class="n">8.1.</span>双方对隐蔽工程、每月完成工程量及系统调试达到设计参数后的竣工进行验收。</p></div>
+    <div class="cl"><p><span class="n">8.2.</span>Sau nghiệm thu hoàn thành, hai bên ký biên bản bàn giao. Từ thời điểm này Bên A tiếp nhận quản lý, sử dụng và bắt đầu tính thời hạn bảo hành. Nếu Bên A đưa hệ thống vào sử dụng trước khi nghiệm thu thì coi như đã bàn giao phần đó.</p>
+    <p class="zh"><span class="n">8.2.</span>竣工验收后双方签署移交记录，自此甲方接管使用并开始计算保修期。甲方在验收前擅自使用的，视为该部分已移交。</p></div>
+  </section>
+
+  <section class="art">
+    <h2>Điều 9. Bảo hành<span class="zh">第九条 保修</span></h2>
+    <div class="cl"><p><span class="n">9.1.</span>Bên B bảo hành công trình [12] tháng kể từ ngày ký biên bản bàn giao. Thiết bị chính được bảo hành theo chính sách của nhà sản xuất nhưng không ít hơn [12] tháng. Thiết bị tận dụng của Bên A chỉ được bảo hành phần lắp đặt.</p>
+    <p class="zh"><span class="n">9.1.</span>乙方对本工程的保修期为[12]个月，自移交记录签署之日起算。主要设备按厂家保修政策执行，但不少于[12]个月。甲方利旧设备仅保修安装部分。</p></div>
+    <div class="cl"><p><span class="n">9.2.</span>Trong thời hạn bảo hành, Bên B có mặt trong vòng [24] giờ và khắc phục hư hỏng do lỗi thi công hoặc vật tư trong vòng [03] ngày kể từ khi nhận thông báo, không tính phí. Hư hỏng do vận hành sai hoặc tác động bên ngoài không thuộc phạm vi bảo hành.</p>
+    <p class="zh"><span class="n">9.2.</span>保修期内，乙方应在接到通知后[24]小时内到场，并在[03]天内免费修复因施工或材料原因造成的缺陷。因操作不当或外力造成的损坏不属保修范围。</p></div>
+  </section>
+
+  <section class="art">
+    <h2>Điều 10. Vi phạm hợp đồng<span class="zh">第十条 违约责任</span></h2>
+    <div class="cl"><p><span class="n">10.1.</span>Bên B chậm tiến độ do lỗi của mình: phạt [0,1]% giá trị phần việc chậm cho mỗi ngày chậm. Bên A chậm thanh toán: trả lãi chậm trả trên số tiền chậm theo lãi suất nợ quá hạn trung bình trên thị trường tại thời điểm thanh toán.</p>
+    <p class="zh"><span class="n">10.1.</span>因乙方原因延误工期的，每延误一天按延误部分价值的[0.1]%支付违约金。甲方延迟付款的，按付款时市场平均逾期贷款利率就延迟金额支付利息。</p></div>
+    <div class="cl"><p><span class="n">10.2.</span>Tổng mức phạt vi phạm không vượt quá [8]% giá trị phần nghĩa vụ hợp đồng bị vi phạm. Bên vi phạm còn phải bồi thường thiệt hại thực tế theo quy định pháp luật.</p>
+    <p class="zh"><span class="n">10.2.</span>违约金总额不超过违约部分合同义务价值的[8]%。违约方还应依法赔偿实际损失。</p></div>
+  </section>
+
+  <section class="art">
+    <h2>Điều 11. Tạm dừng, chấm dứt hợp đồng<span class="zh">第十一条 暂停与终止</span></h2>
+    <div class="cl"><p><span class="n">11.1.</span>Bên A chậm thanh toán quá [30] ngày thì Bên B được tạm dừng thi công sau khi thông báo bằng văn bản trước [07] ngày; thời gian tạm dừng được cộng vào tiến độ.</p>
+    <p class="zh"><span class="n">11.1.</span>甲方逾期付款超过[30]天的，乙方在提前[07]天书面通知后有权暂停施工，暂停期间顺延工期。</p></div>
+    <div class="cl"><p><span class="n">11.2.</span>Mỗi bên được chấm dứt hợp đồng nếu bên kia vi phạm nghiêm trọng và không khắc phục trong [15] ngày kể từ khi nhận thông báo. Khi chấm dứt, hai bên quyết toán phần việc đã thực hiện và vật tư đã đưa về công trường.</p>
+    <p class="zh"><span class="n">11.2.</span>一方严重违约并在收到通知后[15]天内未予纠正的，另一方有权终止合同。合同终止时，双方对已完成工程及已进场材料进行结算。</p></div>
+  </section>
+
+  <section class="art">
+    <h2>Điều 12. Bất khả kháng<span class="zh">第十二条 不可抗力</span></h2>
+    <div class="cl"><p>Bên gặp sự kiện bất khả kháng phải thông báo cho bên kia trong vòng [07] ngày và áp dụng mọi biện pháp cần thiết để hạn chế thiệt hại. Thời gian xảy ra sự kiện không tính vào thời gian thực hiện hợp đồng và không bên nào bị phạt vì lý do này.</p>
+    <p class="zh">遭遇不可抗力的一方应在[07]天内通知对方，并采取一切必要措施减少损失。不可抗力持续期间不计入合同履行期限，双方均不因此承担违约责任。</p></div>
+  </section>
+
+  <section class="art">
+    <h2>Điều 13. Giải quyết tranh chấp<span class="zh">第十三条 争议解决</span></h2>
+    <div class="cl"><p>Hợp đồng được điều chỉnh bởi pháp luật Việt Nam. Tranh chấp được ưu tiên thương lượng trong [30] ngày; nếu không thành, một bên có quyền đưa ra [Tòa án nhân dân có thẩm quyền tại … / Trung tâm Trọng tài Quốc tế Việt Nam (VIAC)] giải quyết.</p>
+    <p class="zh">本合同适用越南法律。双方发生争议时，应先在[30]天内协商解决；协商不成的，任何一方均可提交[…有管辖权的人民法院 / 越南国际仲裁中心（VIAC）]解决。</p></div>
+  </section>
+
+  <section class="art">
+    <h2>Điều 14. Điều khoản chung<span class="zh">第十四条 一般条款</span></h2>
+    <div class="cl"><p><span class="n">14.1.</span>Hợp đồng có hiệu lực từ ngày ký. Mọi sửa đổi, bổ sung phải lập thành phụ lục có chữ ký của hai bên.</p>
+    <p class="zh"><span class="n">14.1.</span>本合同自签字之日起生效。任何修改、补充须以双方签字的补充协议形式订立。</p></div>
+    <div class="cl"><p><span class="n">14.2.</span>Các phụ lục là bộ phận không tách rời của hợp đồng: Phụ lục 01 – Bảng khối lượng và đơn giá (theo Bảng báo giá BG-BLT-2026/[..]); Phụ lục 02 – Bảng thương hiệu thiết bị, vật tư; Phụ lục 03 – Tiến độ thi công.</p>
+    <p class="zh"><span class="n">14.2.</span>下列附件为本合同不可分割的组成部分：附件01–工程量清单与计价表（依据第BG-BLT-2026/[..]号报价单）；附件02–主要设备材料品牌表；附件03–施工进度表。</p></div>
+    <div class="cl"><p><span class="n">14.3.</span>Hợp đồng lập bằng tiếng Việt và tiếng Trung, có giá trị pháp lý như nhau; khi có khác biệt về nội dung thì áp dụng bản [tiếng Việt]. Hợp đồng gồm [04] bản, mỗi bên giữ [02] bản.</p>
+    <p class="zh"><span class="n">14.3.</span>本合同以越南文和中文书写，两种文本具有同等法律效力；如有不一致，以[越南文]文本为准。本合同一式[四]份，双方各执[两]份。</p></div>
+  </section>
+
+  <section class="sign">
+    <div><b>ĐẠI DIỆN BÊN A</b><b class="zh">甲方代表</b><small>Ký, ghi rõ họ tên, đóng dấu · 签字盖章</small><span class="who">[Họ và tên · 姓名]</span></div>
+    <div><b>ĐẠI DIỆN BÊN B</b><b class="zh">乙方代表</b><small>Ký, ghi rõ họ tên, đóng dấu · 签字盖章</small><span class="who">[Họ và tên · 姓名]</span></div>
+  </section>
+</main>
