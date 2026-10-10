@@ -1,15 +1,59 @@
 ---
 name: lap-bao-gia
-description: Lập bảng báo giá cho Công ty CP Thương mại Tổng hợp Minh Phát theo đúng mẫu Excel của công ty (có logo, thông tin công ty, bảng hàng hóa, thuế GTGT, số tiền bằng chữ, điều khoản, chỗ ký) rồi xuất file Excel và PDF để gửi khách qua Zalo/Email. Dùng skill này mỗi khi người dùng muốn làm, soạn, lập, gửi, sửa hoặc in báo giá / bảng giá / phiếu báo giá / chào giá cho khách hàng, kể cả khi họ chỉ liệt kê tên khách và vài mặt hàng kèm giá (ví dụ "báo giá cho cty ABC 50 ram giấy A4 giá 75k"), hoặc dán danh sách hàng từ tin nhắn, ảnh chụp, file Excel khác.
+description: Lập bảng báo giá theo mẫu Excel chuẩn cho các công ty người dùng quản lý (hiện có Công ty CP Thương mại Tổng hợp Minh Phát và Công ty TNHH Kỹ thuật Công trình BLT), mỗi công ty có tên, logo, MST, tài khoản riêng (có logo, thông tin công ty, bảng hàng hóa, thuế GTGT, số tiền bằng chữ, điều khoản, chỗ ký) rồi xuất file Excel và PDF để gửi khách qua Zalo/Email. Dùng skill này mỗi khi người dùng muốn làm, soạn, lập, gửi, sửa hoặc in báo giá / bảng giá / phiếu báo giá / chào giá cho khách hàng, kể cả khi họ chỉ liệt kê tên khách và vài mặt hàng kèm giá (ví dụ "báo giá cho cty ABC 50 ram giấy A4 giá 75k"), hoặc dán danh sách hàng từ tin nhắn, ảnh chụp, file Excel khác. Cũng dùng khi người dùng muốn thêm một công ty mới để làm báo giá, hoặc tạo mẫu báo giá trống cho một công ty.
 ---
 
-# Lập báo giá Minh Phát
+# Lập báo giá
 
-Skill này điền mẫu báo giá chuẩn của công ty (`assets/Mau-bao-gia-Minh-Phat.xlsx`) bằng script `scripts/tao_bao_gia.py`. Script tự làm những việc dễ sai khi làm tay: đánh STT, tính thành tiền, cộng tiền, tính thuế GTGT, **đọc số tiền bằng chữ tiếng Việt**, thêm dòng khi có hơn 12 mặt hàng, ẩn dòng trống, và xuất PDF chỉ gồm trang báo giá.
+Skill này điền mẫu báo giá chuẩn (`assets/Mau-bao-gia-goc.xlsx`) bằng script `scripts/tao_bao_gia.py`. Script tự làm những việc dễ sai khi làm tay: đánh STT, tính thành tiền, cộng tiền, tính thuế GTGT, **đọc số tiền bằng chữ tiếng Việt**, thêm dòng khi có hơn 12 mặt hàng, ẩn dòng trống, và xuất PDF chỉ gồm trang báo giá.
 
 Người dùng thường là nhân viên văn phòng/kế toán, không rành kỹ thuật. Hãy trả lời bằng tiếng Việt, ngắn gọn, không nói về JSON hay script trừ khi họ hỏi.
 
-## Quy trình
+## Các công ty đã lưu
+
+Mỗi công ty là một file hồ sơ trong `assets/cong-ty/` (logo ở `assets/logo/`). Xem danh sách bằng:
+
+```bash
+python scripts/tao_bao_gia.py --danh-sach
+```
+
+| Mã | Công ty | Người dùng hay gọi |
+|---|---|---|
+| `minh-phat` | CÔNG TY CỔ PHẦN THƯƠNG MẠI TỔNG HỢP MINH PHÁT | Minh Phát, MP |
+| `blt` | CÔNG TY TNHH KỸ THUẬT CÔNG TRÌNH BLT | BLT |
+
+Nếu người dùng không nói rõ công ty nào báo giá mà đang có nhiều công ty, hỏi lại một câu ("Báo giá của Minh Phát hay BLT ạ?"), vì sai tên công ty trên báo giá là lỗi nghiêm trọng. Trong cùng cuộc trò chuyện, nếu họ đã chọn một công ty thì dùng tiếp công ty đó.
+
+### Thêm công ty mới
+
+Khi người dùng gửi thông tin một công ty mới (gõ tay, ảnh danh thiếp, ảnh giấy đăng ký kinh doanh...), tạo file `assets/cong-ty/<ma>.json`:
+
+```json
+{
+  "ma": "blt",
+  "ten_goi": ["BLT", "Kỹ thuật Công trình BLT"],
+  "ten": "CÔNG TY TNHH KỸ THUẬT CÔNG TRÌNH BLT",
+  "dia_chi": "...", "mst": "...", "dien_thoai": "0984 586 089", "email": "...", "website": "",
+  "so_tai_khoan": "...", "ngan_hang": "...",
+  "chu_tai_khoan": "CT TNHH KY THUAT CONG TRINH BLT",
+  "nguoi_ky": "HỒ VĂN BÌNH", "chuc_vu": "Giám đốc",
+  "logo": "blt.png", "logo_tam": true
+}
+```
+
+- `ma`: chữ thường, không dấu, ngắn. `ten_goi`: các cách người dùng hay gọi công ty.
+- `website` để `""` nếu không có, khi đó đầu trang chỉ ghi email.
+- `chu_tai_khoan`: ghi đúng tên chủ tài khoản ngân hàng nếu khác tên công ty (thường là tên không dấu, viết tắt). Bỏ trống thì dùng tên công ty.
+- Viết hoa chữ cái đầu cho tên đường, phường, tỉnh; nhóm số điện thoại cho dễ đọc. Giữ nguyên số MST và số tài khoản.
+- Logo: nếu người dùng gửi ảnh logo thì lưu vào `assets/logo/<ma>.png` và đặt `"logo_tam": false`. Nếu chưa có, tạo logo tạm hình tròn có chữ viết tắt (theo kiểu `logo/minh-phat.png`) và đặt `"logo_tam": true`. **Không được để logo của công ty khác** trên báo giá.
+
+Sau đó tạo mẫu trống để người dùng xem trước:
+
+```bash
+python scripts/tao_bao_gia.py --mau <ma> --out "<thư mục>/Mau-bao-gia-<MA>.xlsx" --pdf
+```
+
+## Quy trình lập báo giá
 
 ### 1. Thu thập thông tin
 
@@ -17,6 +61,7 @@ Lấy từ tin nhắn của người dùng (hoặc ảnh, file họ gửi):
 
 | Thông tin | Bắt buộc? | Nếu thiếu |
 |---|---|---|
+| Công ty báo giá (Minh Phát, BLT...) | Có, khi có nhiều công ty | Hỏi lại |
 | Tên khách hàng | Có | Hỏi lại |
 | Danh sách hàng: tên, ĐVT, số lượng, đơn giá | Có | Hỏi lại phần còn thiếu (thường là đơn giá) |
 | Người liên hệ, điện thoại, địa chỉ, email khách | Không | Để trống |
@@ -37,6 +82,7 @@ Cách hiểu cách viết tắt hay gặp:
 
 ```json
 {
+  "cong_ty": "blt",
   "so_bao_gia": "BG-2026/015",
   "ngay": "2026-10-10",
   "khach_hang": {
@@ -56,18 +102,16 @@ Cách hiểu cách viết tắt hay gặp:
     "dia_diem": "tại kho của Quý khách",
     "thanh_toan": "chuyển khoản, 100% khi nhận hàng",
     "thue": "Đơn giá trên chưa bao gồm thuế GTGT; thuế GTGT được tính riêng như bảng trên."
-  },
-  "cong_ty": {
-    "dia_chi": "...", "mst": "...", "dien_thoai": "...", "email": "...", "website": "...",
-    "so_tai_khoan": "...", "ngan_hang": "...", "nguoi_ky": "...", "chuc_vu": "Giám đốc"
   }
 }
 ```
 
+- `cong_ty`: mã hoặc tên gọi của công ty báo giá (`"blt"`, `"Minh Phát"`). Muốn đổi tạm một trường cho riêng báo giá này thì dùng dạng `{"ma": "blt", "nguoi_ky": "..."}`.
+
 - `so_luong` và `don_gia` phải là **số** (72000), không phải chuỗi ("72.000đ"), vì Excel cần số để tính.
 - `ngay` nhận `2026-10-10` hoặc `10/10/2026`.
 - `vat` nhận `10` hoặc `0.1`.
-- Mọi trường trong `dieu_khoan` và `cong_ty` đều tùy chọn: chỉ ghi những gì người dùng nêu. Các điều khoản được nối sau tiêu đề sẵn có (ví dụ "3. Thời gian giao hàng: " + giá trị), nên không cần lặp lại tiêu đề hay dấu chấm cuối câu.
+- Mọi trường trong `dieu_khoan` đều tùy chọn: chỉ ghi những gì người dùng nêu. Các điều khoản được nối sau tiêu đề sẵn có (ví dụ "3. Thời gian giao hàng: " + giá trị), nên không cần lặp lại tiêu đề hay dấu chấm cuối câu.
 
 ### 3. Chạy script
 
@@ -79,19 +123,19 @@ Cần `openpyxl` (`pip install openpyxl` nếu thiếu). Có LibreOffice thì xu
 
 Đặt tên file không dấu, không khoảng trắng, ví dụ `Bao-gia-Cong-ty-ABC-BG-2026-015.xlsx`, để gửi qua Zalo/Email không bị lỗi tên.
 
-Script in ra kết quả gồm: tổng tiền hàng, tiền thuế, tổng cộng, số tiền bằng chữ, và `thong_tin_cong_ty_con_trong` (các ô thông tin công ty vẫn còn chữ mẫu trong ngoặc vuông `[ ]`).
+Script in ra kết quả gồm: tên công ty báo giá, `logo_tam`, tổng tiền hàng, tiền thuế, tổng cộng, số tiền bằng chữ, và `thong_tin_cong_ty_con_trong` (các ô thông tin công ty vẫn còn chữ mẫu trong ngoặc vuông `[ ]`).
 
 ### 4. Kiểm tra và gửi kết quả
 
 - Nếu có PDF, xem nhanh trang PDF (chuyển sang ảnh nếu cần) để chắc chắn bố cục ổn, không tràn trang.
 - Gửi file Excel và PDF cho người dùng, kèm tóm tắt ngắn:
-  - Số báo giá, tên khách, số mặt hàng
+  - Công ty báo giá, số báo giá, tên khách, số mặt hàng
   - Cộng tiền hàng / Thuế GTGT / **Tổng cộng** và số tiền bằng chữ
   - Những gì đã tự giả định (số báo giá tự đặt, ĐVT tự suy ra, giá đã quy đổi về chưa VAT...)
-- **Nếu `thong_tin_cong_ty_con_trong` không rỗng**, nhắc người dùng rằng địa chỉ, MST, số tài khoản... của công ty vẫn là chữ mẫu, khách sẽ thấy điều đó trên báo giá. Mời họ gửi thông tin thật để điền vào (bằng mục `cong_ty`). Đây là lỗi dễ khiến báo giá gửi khách trông thiếu chuyên nghiệp, nên đừng bỏ qua.
+- **Nếu `thong_tin_cong_ty_con_trong` không rỗng**, nhắc người dùng rằng địa chỉ, MST, số tài khoản... của công ty vẫn là chữ mẫu, khách sẽ thấy điều đó trên báo giá. Mời họ gửi thông tin thật để điền vào (bằng mục `cong_ty`). Đây là lỗi dễ khiến báo giá gửi khách trông thiếu chuyên nghiệp, nên đừng bỏ qua. Tương tự, nếu `logo_tam` là true thì nhắc một câu rằng logo đang là logo tạm và mời họ gửi logo thật.
 
 ## Ghi chú
 
 - Mẫu có sẵn 12 dòng hàng. Nhiều hơn thì script tự chèn thêm dòng; quá khoảng 25 mặt hàng thì báo giá tự chia nhiều trang và lặp lại dòng tiêu đề bảng.
-- Logo trong mẫu là logo tạm. Nếu người dùng gửi logo thật, thay ảnh trong `assets/Mau-bao-gia-Minh-Phat.xlsx` (trang "Báo giá", góc trên bên trái, ô A1:A4).
+- Khi người dùng gửi logo thật, lưu đè vào `assets/logo/<ma>.png` (nên là ảnh vuông, nền trong suốt hoặc trắng) và đổi `logo_tam` thành false trong hồ sơ công ty.
 - Khi người dùng muốn **sửa báo giá vừa làm** (đổi giá, thêm hàng...), sửa file JSON rồi chạy lại script. Cách này nhanh hơn và ít lỗi hơn sửa trực tiếp file Excel.

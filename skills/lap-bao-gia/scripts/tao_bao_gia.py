@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Điền mẫu báo giá Minh Phát từ một file JSON và xuất ra Excel (và PDF nếu có LibreOffice).
+"""Điền mẫu báo giá từ một file JSON và xuất ra Excel (và PDF nếu có LibreOffice).
 
 Cách dùng:
-    python tao_bao_gia.py du_lieu.json --out Bao-gia-ABC.xlsx [--pdf]
+    python tao_bao_gia.py du_lieu.json --out Bao-gia-ABC.xlsx [--cong-ty blt] [--pdf]
+    python tao_bao_gia.py --mau blt --out Mau-bao-gia-BLT.xlsx [--pdf]   # chỉ tạo mẫu trống của công ty
+    python tao_bao_gia.py --danh-sach                                     # liệt kê các công ty đã lưu
 
 Cấu trúc JSON xem trong SKILL.md.
 """
@@ -13,12 +15,18 @@ import json
 import shutil
 import subprocess
 import sys
+import unicodedata
 import tempfile
 from pathlib import Path
 
 import openpyxl
+from openpyxl.drawing.image import Image as AnhExcel
 
-MAU = Path(__file__).resolve().parent.parent / "assets" / "Mau-bao-gia-Minh-Phat.xlsx"
+ASSETS = Path(__file__).resolve().parent.parent / "assets"
+MAU = ASSETS / "Mau-bao-gia-goc.xlsx"
+THU_MUC_CONG_TY = ASSETS / "cong-ty"
+THU_MUC_LOGO = ASSETS / "logo"
+CONG_TY_MAC_DINH = "minh-phat"
 
 DONG_HANG_DAU = 18
 SO_DONG_MAU = 12  # dòng 18..29 trong mẫu
@@ -37,6 +45,75 @@ O_CONG_TY = {
     "nguoi_ky": "C12",
     "chuc_vu": "C13",
 }
+
+
+# ---------------------------------------------------------------------------
+# Hồ sơ công ty (assets/cong-ty/*.json)
+# ---------------------------------------------------------------------------
+def _khong_dau(chu):
+    chu = unicodedata.normalize("NFD", str(chu)).replace("đ", "d").replace("Đ", "D")
+    return "".join(c for c in chu if unicodedata.category(c) != "Mn").lower().strip()
+
+
+def danh_sach_cong_ty():
+    return [json.loads(p.read_text(encoding="utf-8")) for p in sorted(THU_MUC_CONG_TY.glob("*.json"))]
+
+
+def tim_cong_ty(ten):
+    """Tìm hồ sơ theo mã (blt), tên gọi (BLT, Minh Phát) hoặc tên đầy đủ, không phân biệt dấu/hoa thường."""
+    can_tim = _khong_dau(ten)
+    for ct in danh_sach_cong_ty():
+        cac_ten = [ct.get("ma", ""), ct.get("ten", "")] + list(ct.get("ten_goi", []))
+        if can_tim in [_khong_dau(t) for t in cac_ten if t]:
+            return ct
+    ma = ", ".join(ct.get("ma", "") for ct in danh_sach_cong_ty())
+    raise SystemExit(f"Không tìm thấy công ty {ten!r}. Các công ty đã lưu: {ma}")
+
+
+def nap_cong_ty(gia_tri):
+    """gia_tri: mã/tên công ty (chuỗi), hoặc dict có 'ma' (+ trường ghi đè), hoặc None (mặc định)."""
+    if gia_tri is None:
+        return tim_cong_ty(CONG_TY_MAC_DINH)
+    if isinstance(gia_tri, str):
+        return tim_cong_ty(gia_tri)
+    ct = dict(tim_cong_ty(gia_tri.get("ma") or CONG_TY_MAC_DINH))
+    ct.update({k: v for k, v in gia_tri.items() if v})
+    return ct
+
+
+def ap_dung_cong_ty(wb, ct):
+    """Ghi thông tin công ty vào trang 'Thông tin công ty' và thay logo. Gọi trước khi chèn dòng."""
+    ws = wb["Báo giá"]
+    ws_ct = wb["Thông tin công ty"]
+    for khoa, o in O_CONG_TY.items():
+        if ct.get(khoa):
+            ws_ct[o] = ct[khoa]
+    if "website" in ct and not ct["website"]:
+        # Không có website: đầu trang chỉ ghi email
+        ws_ct["C9"] = ""
+        ws["B4"] = "=\"Email: \"&'Thông tin công ty'!$C$8"
+    if ct.get("chu_tai_khoan"):
+        ws["A41"] = ("=\"6. Tài khoản: \"&'Thông tin công ty'!$C$10&\" – \"&'Thông tin công ty'!$C$11"
+                     f"&\" – Chủ tài khoản: {ct['chu_tai_khoan']}\"")
+    if ct.get("logo"):
+        duong_dan_logo = THU_MUC_LOGO / ct["logo"]
+        if duong_dan_logo.exists() and ws._images:
+            anh = AnhExcel(str(duong_dan_logo))
+            anh.anchor = ws._images[0].anchor
+            ws._images = [anh]
+    return [k for k, o in O_CONG_TY.items() if "[" in str(ws_ct[o].value or "")]
+
+
+def tao_mau(ct, duong_dan_ra):
+    """Tạo mẫu báo giá trống (giữ 2 dòng ví dụ) mang thông tin của một công ty."""
+    wb = openpyxl.load_workbook(MAU)
+    con_trong = ap_dung_cong_ty(wb, ct)
+    wb.calculation.fullCalcOnLoad = True
+    duong_dan_ra = Path(duong_dan_ra)
+    duong_dan_ra.parent.mkdir(parents=True, exist_ok=True)
+    wb.save(duong_dan_ra)
+    return {"file_excel": str(duong_dan_ra), "cong_ty": ct.get("ten"),
+            "logo_tam": bool(ct.get("logo_tam")), "thong_tin_cong_ty_con_trong": con_trong}
 
 # ---------------------------------------------------------------------------
 # Đọc số tiền bằng chữ tiếng Việt
@@ -167,13 +244,9 @@ def doc_ngay(gia_tri):
 def tao(du_lieu, duong_dan_ra):
     wb = openpyxl.load_workbook(MAU)
     ws = wb["Báo giá"]
-    ws_ct = wb["Thông tin công ty"]
 
-    # Thông tin công ty (chỉ ghi đè những trường được cung cấp)
-    for khoa, gia_tri in (du_lieu.get("cong_ty") or {}).items():
-        if khoa in O_CONG_TY and gia_tri:
-            ws_ct[O_CONG_TY[khoa]] = gia_tri
-    con_trong = [k for k, o in O_CONG_TY.items() if "[" in str(ws_ct[o].value or "")]
+    ct = nap_cong_ty(du_lieu.get("cong_ty"))
+    con_trong = ap_dung_cong_ty(wb, ct)
 
     hang = du_lieu.get("hang_hoa") or []
     if not hang:
@@ -244,6 +317,8 @@ def tao(du_lieu, duong_dan_ra):
     wb.save(duong_dan_ra)
     return {
         "file_excel": str(duong_dan_ra),
+        "cong_ty": ct.get("ten"),
+        "logo_tam": bool(ct.get("logo_tam")),
         "so_bao_gia": ws["F12"].value,
         "so_mat_hang": len(hang),
         "cong_tien_hang": tong_hang,
@@ -281,14 +356,30 @@ def xuat_pdf(file_excel):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("du_lieu", help="file JSON chứa thông tin báo giá")
-    ap.add_argument("--out", required=True, help="đường dẫn file Excel đầu ra")
+    ap.add_argument("du_lieu", nargs="?", help="file JSON chứa thông tin báo giá")
+    ap.add_argument("--out", help="đường dẫn file Excel đầu ra")
+    ap.add_argument("--cong-ty", help="mã hoặc tên công ty báo giá (ghi đè trường cong_ty trong JSON)")
+    ap.add_argument("--mau", metavar="CONG_TY", help="chỉ tạo mẫu báo giá trống cho công ty này")
+    ap.add_argument("--danh-sach", action="store_true", help="liệt kê các công ty đã lưu")
     ap.add_argument("--pdf", action="store_true", help="xuất thêm PDF (cần LibreOffice)")
     args = ap.parse_args()
 
-    with open(args.du_lieu, encoding="utf-8") as f:
-        du_lieu = json.load(f)
-    ket_qua = tao(du_lieu, args.out)
+    if args.danh_sach:
+        for ct in danh_sach_cong_ty():
+            print(f"{ct.get('ma')}: {ct.get('ten')}  (gọi là: {', '.join(ct.get('ten_goi', []))})")
+        return
+    if not args.out:
+        ap.error("cần --out")
+    if args.mau:
+        ket_qua = tao_mau(tim_cong_ty(args.mau), args.out)
+    else:
+        if not args.du_lieu:
+            ap.error("cần file JSON dữ liệu báo giá (hoặc dùng --mau)")
+        with open(args.du_lieu, encoding="utf-8") as f:
+            du_lieu = json.load(f)
+        if args.cong_ty:
+            du_lieu["cong_ty"] = args.cong_ty
+        ket_qua = tao(du_lieu, args.out)
     if args.pdf:
         ket_qua["file_pdf"] = xuat_pdf(ket_qua["file_excel"])
     json.dump(ket_qua, sys.stdout, ensure_ascii=False, indent=2)
