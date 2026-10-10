@@ -1,6 +1,6 @@
 ---
 name: lap-bao-gia
-description: Lập bảng báo giá theo mẫu Excel chuẩn cho các công ty người dùng quản lý (hiện có Công ty CP Thương mại Tổng hợp Minh Phát và Công ty TNHH Kỹ thuật Công trình BLT), mỗi công ty có tên, logo, MST, tài khoản riêng (có logo, thông tin công ty, bảng hàng hóa, thuế GTGT, số tiền bằng chữ, điều khoản, chỗ ký) rồi xuất file Excel và PDF để gửi khách qua Zalo/Email. Dùng skill này mỗi khi người dùng muốn làm, soạn, lập, gửi, sửa hoặc in báo giá / bảng giá / phiếu báo giá / chào giá cho khách hàng, kể cả khi họ chỉ liệt kê tên khách và vài mặt hàng kèm giá (ví dụ "báo giá cho cty ABC 50 ram giấy A4 giá 75k"), hoặc dán danh sách hàng từ tin nhắn, ảnh chụp, file Excel khác. Cũng dùng khi người dùng muốn thêm một công ty mới để làm báo giá, hoặc tạo mẫu báo giá trống cho một công ty.
+description: Lập bảng báo giá theo mẫu Excel chuẩn cho các công ty người dùng quản lý (hiện có Công ty CP Thương mại Tổng hợp Minh Phát và Công ty TNHH Kỹ thuật Công trình BLT), mỗi công ty có tên, logo, MST, tài khoản riêng (có logo, thông tin công ty, bảng hàng hóa, thuế GTGT, số tiền bằng chữ, điều khoản, chỗ ký) rồi xuất file Excel và PDF để gửi khách qua Zalo/Email. Dùng skill này mỗi khi người dùng muốn làm, soạn, lập, gửi, sửa hoặc in báo giá / bảng giá / phiếu báo giá / chào giá cho khách hàng, kể cả khi họ chỉ liệt kê tên khách và vài mặt hàng kèm giá (ví dụ "báo giá cho cty ABC 50 ram giấy A4 giá 75k"), hoặc dán danh sách hàng từ tin nhắn, ảnh chụp, file Excel khác. Làm được cả bản song ngữ Việt – Trung (报价单) khi khách là công ty Trung Quốc hoặc người dùng xin "bản song ngữ", "tiếng Trung", "中文". Cũng dùng khi người dùng muốn thêm một công ty mới để làm báo giá, hoặc tạo mẫu báo giá trống cho một công ty.
 ---
 
 # Lập báo giá
@@ -134,6 +134,27 @@ Script in ra kết quả gồm: tên công ty báo giá, `logo_tam`, tổng ti�
   - Cộng tiền hàng / Thuế GTGT / **Tổng cộng** và số tiền bằng chữ
   - Những gì đã tự giả định (số báo giá tự đặt, ĐVT tự suy ra, giá đã quy đổi về chưa VAT...)
 - **Nếu `thong_tin_cong_ty_con_trong` không rỗng**, nhắc người dùng rằng địa chỉ, MST, số tài khoản... của công ty vẫn là chữ mẫu, khách sẽ thấy điều đó trên báo giá. Mời họ gửi thông tin thật để điền vào (bằng mục `cong_ty`). Đây là lỗi dễ khiến báo giá gửi khách trông thiếu chuyên nghiệp, nên đừng bỏ qua. Tương tự, nếu `logo_tam` là true thì nhắc một câu rằng logo đang là logo tạm và mời họ gửi logo thật.
+
+## Bản song ngữ Việt – Trung
+
+Khi người dùng cần báo giá song ngữ (khách Trung Quốc, BOQ song ngữ, "bản tiếng Trung"...), thêm vào JSON:
+
+```json
+{
+  "song_ngu": true,
+  "cong_trinh_zh": "MEGA一期MS1一楼&BP2空调安装工程——空调电气系统部分",
+  "dieu_khoan_zh": {"thue": "...", "hieu_luc": "...", "giao_hang": "...", "dia_diem": "...", "thanh_toan": "..."},
+  "hang_hoa": [{"ten": "Cáp điện động lực lõi đồng YJV-3×70+1×35", "ten_zh": "电力电缆 铜芯 YJV-3×70+1×35",
+                "dvt": "m", "dvt_zh": "米", "ghi_chu": "Hàng trong nước", "ghi_chu_zh": "国产优质", ...}]
+}
+```
+
+- Script tự đổi mọi nhãn (tiêu đề, cột bảng, tổng tiền, điều khoản, chỗ ký) sang hai dòng Việt/Trung và thêm số tiền bằng chữ tiếng Trung (大写金额, ví dụ 壹仟壹佰万越南盾整).
+- Mỗi điều khoản đã nêu bằng tiếng Việt cần có bản dịch trong `dieu_khoan_zh`; điều khoản để mặc định thì script có sẵn bản dịch.
+- Nếu file của khách đã có tên tiếng Trung (BOQ song ngữ), **dùng đúng thuật ngữ gốc của khách** cho `ten_zh` thay vì tự dịch, vì khách sẽ đối chiếu với bảng của họ.
+- Tên hãng (ABB, Schneider, LS...) chỉ ghi bằng chữ Latin trong `ghi_chu`, không cần `ghi_chu_zh`, vì hai bên đều đọc được.
+- Tên công ty, địa chỉ giữ nguyên tiếng Việt (tên pháp lý). Chức vụ người ký tự dịch (Giám đốc → 总经理); muốn khác thì thêm `chuc_vu_zh` vào hồ sơ công ty.
+- Bản song ngữ dài hơn. Nếu trang cuối chỉ còn vài dòng, đặt `"so_trang": <số trang>` để thu nhỏ vừa, rồi xem lại PDF để chắc chữ vẫn đọc rõ.
 
 ## Báo giá từ bảng khối lượng (BOQ) của khách
 

@@ -22,6 +22,7 @@ from pathlib import Path
 
 import openpyxl
 from openpyxl.drawing.image import Image as AnhExcel
+from openpyxl.styles import Alignment
 
 ASSETS = Path(__file__).resolve().parent.parent / "assets"
 MAU = ASSETS / "Mau-bao-gia-goc.xlsx"
@@ -189,6 +190,45 @@ def so_thanh_chu(so_tien):
     return cau + "."
 
 
+SO_HAN = "零壹贰叁肆伍陆柒捌玖"
+
+
+def _doc_nhom_han(n):
+    """Đọc nhóm 4 chữ số bằng chữ số viết hoa tiếng Trung (大写)."""
+    tu, can_khong = "", False
+    for i, dvi in zip(range(3, -1, -1), ["仟", "佰", "拾", ""]):
+        so = (n // 10 ** i) % 10
+        if so == 0:
+            can_khong = bool(tu)
+        else:
+            if can_khong:
+                tu += "零"
+                can_khong = False
+            tu += SO_HAN[so] + dvi
+    return tu
+
+
+def so_thanh_chu_trung(so_tien):
+    """Số tiền bằng chữ tiếng Trung, ví dụ 11000000 -> 壹仟壹佰万越南盾整."""
+    n = int(round(abs(so_tien)))
+    if n == 0:
+        return "零越南盾整"
+    nhom = []
+    while n:
+        nhom.append(n % 10000)
+        n //= 10000
+    don_vi = ["", "万", "亿", "万亿"]
+    tu = ""
+    for i in range(len(nhom) - 1, -1, -1):
+        g = nhom[i]
+        if g == 0:
+            continue
+        if tu and (g < 1000 or nhom[i + 1] == 0):
+            tu += "零"
+        tu += _doc_nhom_han(g) + don_vi[i]
+    return ("负" if so_tien < 0 else "") + tu + "越南盾整"
+
+
 # ---------------------------------------------------------------------------
 # Thêm dòng khi có hơn 12 mặt hàng
 # ---------------------------------------------------------------------------
@@ -226,20 +266,26 @@ def them_dong(ws, so_dong_them):
     ws.print_area = f"A1:G{cuoi_khoi + so_dong_them}"
 
 
+def _do_dai(chu):
+    """Độ rộng hiển thị: chữ Hán/Trung chiếm gấp đôi chữ Latin."""
+    return sum(1.7 if unicodedata.east_asian_width(c) in "WF" else 1 for c in chu)
+
+
 def _so_dong_chu(chu, do_rong_cot):
     """Ước lượng số dòng khi ô tự xuống dòng (Arial 10)."""
     if not chu:
         return 1
-    ky_tu_moi_dong = max(4, int(do_rong_cot * 1.1) - 1)
+    ky_tu_moi_dong = max(4, do_rong_cot * 1.15 - 1)
     tong = 0
     for doan in str(chu).split("\n"):
         # Ngắt theo từ như Excel: từ không vừa thì xuống dòng mới
         dong, dai = 1, 0
         for tu in doan.split():
-            if dai and dai + 1 + len(tu) > ky_tu_moi_dong:
-                dong, dai = dong + 1, len(tu)
+            dai_tu = _do_dai(tu)
+            if dai and dai + 1 + dai_tu > ky_tu_moi_dong:
+                dong, dai = dong + 1, dai_tu
             else:
-                dai += (1 if dai else 0) + len(tu)
+                dai += (1 if dai else 0) + dai_tu
             while dai > ky_tu_moi_dong:
                 dong, dai = dong + 1, dai - ky_tu_moi_dong
         tong += dong
@@ -252,13 +298,109 @@ def chinh_chieu_cao(ws, dong_dau, so_dong):
     for r in range(dong_dau, dong_dau + so_dong):
         so_dong_max = max(_so_dong_chu(ws[f"{col}{r}"].value, ws.column_dimensions[col].width or 10)
                           for col in "BCG")
-        cao = max(19.5, 12.5 * so_dong_max + 5)
+        cao = max(19.5, 11.5 * so_dong_max + 6)
         ws.row_dimensions[r].height = cao
         tong += cao
     return tong
 
 
 # ---------------------------------------------------------------------------
+def _hai_dong(viet, trung):
+    viet = viet or ""
+    if not trung:
+        return viet
+    return f"{viet}\n{trung}" if viet else trung
+
+
+def _xuong_dong(o):
+    a = o.alignment
+    o.alignment = Alignment(horizontal=a.horizontal, vertical=a.vertical, indent=a.indent,
+                            text_rotation=a.text_rotation, shrink_to_fit=a.shrink_to_fit, wrap_text=True)
+
+
+DK_ZH_MAC_DINH = {
+    "thue": "以上单价不含增值税，增值税按上表另行计算。",
+    "hieu_luc": "自报价之日起30天",
+    "giao_hang": "自贵方确认订货之日起3天内",
+    "dia_diem": "贵方仓库",
+    "thanh_toan": "银行转账，收货时付清100%",
+}
+CHUC_VU_ZH = {"giám đốc": "总经理", "tổng giám đốc": "总经理", "phó giám đốc": "副总经理",
+              "trưởng phòng kinh doanh": "销售经理", "kế toán trưởng": "会计主管"}
+
+
+def ap_dung_song_ngu(ws, d, du_lieu, ct, tong_cong):
+    """Đổi các nhãn của mẫu sang song ngữ Việt – Trung (d: số dòng đã chèn thêm)."""
+    CT = "'Thông tin công ty'!"
+    ws["B2"] = f'="Địa chỉ / 地址: "&{CT}$C$5'
+    ws["B3"] = f'="MST / 税号: "&{CT}$C$6&"   |   Điện thoại / 电话: "&{CT}$C$7'
+    if ct.get("website"):
+        ws["B4"] = f'="Email / 邮箱: "&{CT}$C$8&"   |   Website / 网站: "&{CT}$C$9'
+    else:
+        ws["B4"] = f'="Email / 邮箱: "&{CT}$C$8'
+    ws["A7"] = "BẢNG BÁO GIÁ / 报价单"
+    ws["A8"] = '="Số / 编号: "&F12&"  –  Ngày / 日期: "&TEXT(F13,"dd/mm/yyyy")'
+    for o, nhan in {"B10": "Kính gửi / 致:", "B11": "Người liên hệ / 联系人:", "B12": "Địa chỉ / 地址:",
+                    "B13": "Email / 邮箱:", "E11": "Điện thoại\n电话:", "E12": "Số báo giá\n报价编号:",
+                    "E13": "Ngày báo giá\n报价日期:"}.items():
+        ws[o] = nhan
+        _xuong_dong(ws[o])
+    for r in range(10, 14):
+        ws.row_dimensions[r].height = 27
+
+    ten_ct = ct.get("ten", "")
+    cong_trinh = du_lieu.get("cong_trinh")
+    cong_trinh_zh = du_lieu.get("cong_trinh_zh")
+    viet = (f"{ten_ct} trân trọng cảm ơn Quý khách đã quan tâm. Chúng tôi xin gửi tới Quý khách bảng báo giá "
+            f"{cong_trinh} như sau:" if cong_trinh else
+            f"{ten_ct} trân trọng cảm ơn Quý khách đã quan tâm đến sản phẩm của chúng tôi. "
+            "Chúng tôi xin gửi tới Quý khách bảng báo giá như sau:")
+    trung = (f"我司衷心感谢贵方的关注，现将{cong_trinh_zh}报价如下：" if cong_trinh_zh else
+             "我司衷心感谢贵方对我司产品的关注，现将报价如下：")
+    ws["A15"] = viet + "\n" + trung
+    ws.row_dimensions[15].height = 13 * _so_dong_chu(ws["A15"].value, 112) + 6
+
+    for o, nhan in {"A17": "STT\n序号", "B17": "Tên hàng hóa / Quy cách\n货物名称 / 规格", "C17": "ĐVT\n单位",
+                    "D17": "Số lượng\n数量", "E17": "Đơn giá (VNĐ)\n单价(越南盾)",
+                    "F17": "Thành tiền (VNĐ)\n金额(越南盾)", "G17": "Ghi chú\n备注"}.items():
+        ws[o] = nhan
+        _xuong_dong(ws[o])
+    ws.row_dimensions[17].height = 34
+
+    ws[f"A{30 + d}"] = "Cộng tiền hàng / 货款合计"
+    ws[f"A{31 + d}"] = "Thuế GTGT (VAT) – thuế suất / 增值税税率:"
+    ws[f"A{32 + d}"] = "TỔNG CỘNG THANH TOÁN / 付款总额"
+    ws[f"A{33 + d}"] = ("Số tiền bằng chữ: " + so_thanh_chu(tong_cong) +
+                        "\n大写金额：" + so_thanh_chu_trung(tong_cong))
+    ws.row_dimensions[33 + d].height = 13 * _so_dong_chu(ws[f"A{33 + d}"].value, 112) + 6
+
+    ws[f"A{35 + d}"] = "ĐIỀU KHOẢN BÁO GIÁ / 报价条款"
+    dk_zh = {**DK_ZH_MAC_DINH, **(du_lieu.get("dieu_khoan_zh") or {})}
+    nhan_zh = {"thue": "1. ", "hieu_luc": "2. 报价有效期：", "giao_hang": "3. 交货时间：",
+               "dia_diem": "4. 交货地点：", "thanh_toan": "5. 付款方式："}
+    for i, khoa in enumerate(["thue", "hieu_luc", "giao_hang", "dia_diem", "thanh_toan"]):
+        o = ws[f"A{36 + d + i}"]
+        o.value = f"{o.value}\n{nhan_zh[khoa]}{dk_zh[khoa].rstrip('。')}。"
+        _xuong_dong(o)
+    chu_tk = ct.get("chu_tai_khoan")
+    chu_tk_ct = f'"{chu_tk}"' if chu_tk else f"{CT}$C$4"
+    ws[f"A{41 + d}"] = (f'="6. Tài khoản / 银行账户: "&{CT}$C$10&" – "&{CT}$C$11'
+                        f'&" – Chủ tài khoản / 户名: "&{chu_tk_ct}')
+
+    ws[f"A{43 + d}"] = "Rất mong nhận được sự hợp tác của Quý khách. Trân trọng!\n期待与贵方合作，此致敬礼！"
+    _xuong_dong(ws[f"A{43 + d}"])
+    ws.row_dimensions[43 + d].height = 30
+    chuc_vu = ct.get("chuc_vu") or "Giám đốc"
+    chuc_vu_zh = ct.get("chuc_vu_zh") or CHUC_VU_ZH.get(chuc_vu.lower(), "")
+    ws[f"A{45 + d}"] = "KHÁCH HÀNG XÁC NHẬN\n客户确认"
+    ws[f"E{45 + d}"] = chuc_vu.upper() + (f"\n{chuc_vu_zh}" if chuc_vu_zh else "")
+    ws[f"A{46 + d}"] = "(Ký, ghi rõ họ tên / 签字并注明姓名)"
+    ws[f"E{46 + d}"] = "(Ký, đóng dấu, ghi rõ họ tên / 签字盖章并注明姓名)"
+    for o in (f"A{45 + d}", f"E{45 + d}"):
+        _xuong_dong(ws[o])
+    ws.row_dimensions[45 + d].height = 30
+
+
 def doc_ngay(gia_tri):
     if not gia_tri:
         return dt.datetime.combine(dt.date.today(), dt.time())
@@ -293,6 +435,7 @@ def tao(du_lieu, duong_dan_ra):
     ws["C13"] = kh.get("email") or ""
 
     ngay = doc_ngay(du_lieu.get("ngay"))
+    song_ngu = bool(du_lieu.get("song_ngu"))
     if du_lieu.get("cong_trinh"):
         # Báo giá cho một công trình/dự án: nêu rõ trong lời mở đầu
         ws["A15"] = ("='Thông tin công ty'!$C$4&\" trân trọng cảm ơn Quý khách đã quan tâm. "
@@ -312,11 +455,11 @@ def tao(du_lieu, duong_dan_ra):
         r = DONG_HANG_DAU + i
         sl = mh.get("so_luong")
         dg = mh.get("don_gia")
-        ws[f"B{r}"] = mh.get("ten") or ""
-        ws[f"C{r}"] = mh.get("dvt") or ""
+        ws[f"B{r}"] = _hai_dong(mh.get("ten"), mh.get("ten_zh") if song_ngu else None)
+        ws[f"C{r}"] = _hai_dong(mh.get("dvt"), mh.get("dvt_zh") if song_ngu else None)
         ws[f"D{r}"] = sl
         ws[f"E{r}"] = dg
-        ws[f"G{r}"] = mh.get("ghi_chu") or ""
+        ws[f"G{r}"] = _hai_dong(mh.get("ghi_chu"), mh.get("ghi_chu_zh") if song_ngu else None)
         if isinstance(sl, (int, float)):
             ws[f"D{r}"].number_format = "#,##0" if float(sl).is_integer() else "#,##0.##"
         if sl is not None and dg is not None:
@@ -353,8 +496,14 @@ def tao(du_lieu, duong_dan_ra):
     ws[f"A{39 + d}"] = "4. Địa điểm giao hàng: " + dk.get("dia_diem", "tại kho của Quý khách") + "."
     ws[f"A{40 + d}"] = "5. Thanh toán: " + dk.get("thanh_toan", "chuyển khoản, 100% khi nhận hàng") + "."
     rong_ca_trang = sum(ws.column_dimensions[c].width or 10 for c in "ABCDEFG")
+    if song_ngu:
+        ap_dung_song_ngu(ws, d, du_lieu, ct, tong_cong)
     for r in range(36 + d, 41 + d):
         ws.row_dimensions[r].height = max(18, 13 * _so_dong_chu(ws[f"A{r}"].value, rong_ca_trang) + 4)
+
+    if du_lieu.get("so_trang"):
+        # Thu nhỏ vừa đúng số trang mong muốn (khi trang cuối chỉ còn vài dòng)
+        ws.page_setup.fitToHeight = int(du_lieu["so_trang"])
 
     wb.calculation.fullCalcOnLoad = True
     duong_dan_ra = Path(duong_dan_ra)
@@ -371,6 +520,7 @@ def tao(du_lieu, duong_dan_ra):
         "tien_thue": tien_thue,
         "tong_cong": tong_cong,
         "bang_chu": so_thanh_chu(tong_cong),
+        "bang_chu_zh": so_thanh_chu_trung(tong_cong) if song_ngu else None,
         "thong_tin_cong_ty_con_trong": con_trong,
     }
 
