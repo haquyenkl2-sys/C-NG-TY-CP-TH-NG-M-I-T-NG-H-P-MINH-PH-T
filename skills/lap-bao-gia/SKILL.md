@@ -106,6 +106,7 @@ Cách hiểu cách viết tắt hay gặp:
 }
 ```
 
+- `cong_trinh` (tùy chọn): khi báo giá cho một công trình/dự án, ghi tên hạng mục + công trình; nó được đưa vào lời mở đầu ("...xin gửi tới Quý khách bảng báo giá <cong_trinh> như sau:").
 - `cong_ty`: mã hoặc tên gọi của công ty báo giá (`"blt"`, `"Minh Phát"`). Muốn đổi tạm một trường cho riêng báo giá này thì dùng dạng `{"ma": "blt", "nguoi_ky": "..."}`.
 
 - `so_luong` và `don_gia` phải là **số** (72000), không phải chuỗi ("72.000đ"), vì Excel cần số để tính.
@@ -134,8 +135,17 @@ Script in ra kết quả gồm: tên công ty báo giá, `logo_tam`, tổng ti�
   - Những gì đã tự giả định (số báo giá tự đặt, ĐVT tự suy ra, giá đã quy đổi về chưa VAT...)
 - **Nếu `thong_tin_cong_ty_con_trong` không rỗng**, nhắc người dùng rằng địa chỉ, MST, số tài khoản... của công ty vẫn là chữ mẫu, khách sẽ thấy điều đó trên báo giá. Mời họ gửi thông tin thật để điền vào (bằng mục `cong_ty`). Đây là lỗi dễ khiến báo giá gửi khách trông thiếu chuyên nghiệp, nên đừng bỏ qua. Tương tự, nếu `logo_tam` là true thì nhắc một câu rằng logo đang là logo tạm và mời họ gửi logo thật.
 
+## Báo giá từ bảng khối lượng (BOQ) của khách
+
+Khách công trình thường gửi file Excel bảng khối lượng (có khi song ngữ Trung–Việt) với cột khối lượng, đơn giá vật tư, đơn giá nhân công, đơn giá tổng hợp. Khi người dùng muốn làm báo giá từ file đó:
+- Chỉ lấy các dòng **đã có đơn giá**; dòng giá trống/0 thì bỏ và báo lại cho người dùng.
+- Đơn giá = đơn giá tổng hợp (vật tư + nhân công); ghi rõ trong điều khoản 1 rằng giá đã gồm vật tư và nhân công.
+- Viết tên hàng bằng tiếng Việt, gọn: tên + quy cách chính (mã hiệu, kích thước, tiết diện cáp). Thương hiệu đưa vào Ghi chú.
+- Lấy số liệu (khối lượng, đơn giá) bằng code từ file, đừng gõ tay, rồi đối chiếu tổng tiền với tổng trong file.
+- Ghi `cong_trinh` và điều khoản phù hợp công trình (khối lượng quyết toán theo thực tế, giao hàng theo tiến độ...).
+
 ## Ghi chú
 
-- Mẫu có sẵn 12 dòng hàng. Nhiều hơn thì script tự chèn thêm dòng; quá khoảng 25 mặt hàng thì báo giá tự chia nhiều trang và lặp lại dòng tiêu đề bảng.
+- Mẫu có sẵn 12 dòng hàng. Nhiều hơn thì script tự chèn thêm dòng. Dòng có tên dài tự cao lên cho đủ chữ; bảng dài thì báo giá tự chia nhiều trang và lặp lại dòng tiêu đề bảng.
 - Khi người dùng gửi logo thật, lưu đè vào `assets/logo/<ma>.png` (nên là ảnh vuông, nền trong suốt hoặc trắng) và đổi `logo_tam` thành false trong hồ sơ công ty.
 - Khi người dùng muốn **sửa báo giá vừa làm** (đổi giá, thêm hàng...), sửa file JSON rồi chạy lại script. Cách này nhanh hơn và ít lỗi hơn sửa trực tiếp file Excel.

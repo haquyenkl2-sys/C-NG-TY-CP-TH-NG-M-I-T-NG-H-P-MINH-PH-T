@@ -12,6 +12,7 @@ import argparse
 import copy
 import datetime as dt
 import json
+import math
 import shutil
 import subprocess
 import sys
@@ -223,10 +224,38 @@ def them_dong(ws, so_dong_them):
     dong_cong = dau_khoi + so_dong_them
     ws[f"F{dong_cong}"] = f"=SUM(F{DONG_HANG_DAU}:F{dong_cong - 1})"
     ws.print_area = f"A1:G{cuoi_khoi + so_dong_them}"
-    if so_dong_them > 13:
-        # Quá dài cho 1 trang: cho phép nhiều trang, lặp lại dòng tiêu đề bảng
-        ws.page_setup.fitToHeight = 0
-        ws.print_title_rows = "17:17"
+
+
+def _so_dong_chu(chu, do_rong_cot):
+    """Ước lượng số dòng khi ô tự xuống dòng (Arial 10)."""
+    if not chu:
+        return 1
+    ky_tu_moi_dong = max(4, int(do_rong_cot * 1.1) - 1)
+    tong = 0
+    for doan in str(chu).split("\n"):
+        # Ngắt theo từ như Excel: từ không vừa thì xuống dòng mới
+        dong, dai = 1, 0
+        for tu in doan.split():
+            if dai and dai + 1 + len(tu) > ky_tu_moi_dong:
+                dong, dai = dong + 1, len(tu)
+            else:
+                dai += (1 if dai else 0) + len(tu)
+            while dai > ky_tu_moi_dong:
+                dong, dai = dong + 1, dai - ky_tu_moi_dong
+        tong += dong
+    return tong
+
+
+def chinh_chieu_cao(ws, dong_dau, so_dong):
+    """Cho dòng hàng cao lên vừa nội dung dài; trả về tổng chiều cao bảng hàng (pt)."""
+    tong = 0
+    for r in range(dong_dau, dong_dau + so_dong):
+        so_dong_max = max(_so_dong_chu(ws[f"{col}{r}"].value, ws.column_dimensions[col].width or 10)
+                          for col in "BCG")
+        cao = max(19.5, 12.5 * so_dong_max + 5)
+        ws.row_dimensions[r].height = cao
+        tong += cao
+    return tong
 
 
 # ---------------------------------------------------------------------------
@@ -264,6 +293,12 @@ def tao(du_lieu, duong_dan_ra):
     ws["C13"] = kh.get("email") or ""
 
     ngay = doc_ngay(du_lieu.get("ngay"))
+    if du_lieu.get("cong_trinh"):
+        # Báo giá cho một công trình/dự án: nêu rõ trong lời mở đầu
+        ws["A15"] = ("='Thông tin công ty'!$C$4&\" trân trọng cảm ơn Quý khách đã quan tâm. "
+                     f"Chúng tôi xin gửi tới Quý khách bảng báo giá {du_lieu['cong_trinh']} như sau:\"")
+        ws.row_dimensions[15].height = max(30, 13 * _so_dong_chu(
+            "x" * 60 + du_lieu["cong_trinh"] + "x" * 80, 112) + 4)
     ws["F12"] = du_lieu.get("so_bao_gia") or f"BG-{ngay:%Y}/{ngay:%m%d}"
     ws["F13"] = ngay
 
@@ -282,8 +317,15 @@ def tao(du_lieu, duong_dan_ra):
         ws[f"D{r}"] = sl
         ws[f"E{r}"] = dg
         ws[f"G{r}"] = mh.get("ghi_chu") or ""
+        if isinstance(sl, (int, float)):
+            ws[f"D{r}"].number_format = "#,##0" if float(sl).is_integer() else "#,##0.##"
         if sl is not None and dg is not None:
             tong_hang += sl * dg
+    cao_bang = chinh_chieu_cao(ws, DONG_HANG_DAU, len(hang))
+    if cao_bang > 330:
+        # Quá dài cho 1 trang A4: cho phép nhiều trang, lặp lại dòng tiêu đề bảng
+        ws.page_setup.fitToHeight = 0
+        ws.print_title_rows = "17:17"
     # Ẩn các dòng trống còn thừa cho bảng gọn (mở lại bằng Unhide nếu cần thêm hàng)
     for r in range(DONG_HANG_DAU + len(hang), DONG_HANG_DAU + SO_DONG_MAU):
         ws.row_dimensions[r].hidden = True
@@ -310,6 +352,9 @@ def tao(du_lieu, duong_dan_ra):
         "giao_hang", "trong vòng 03 ngày kể từ khi Quý khách xác nhận đặt hàng") + "."
     ws[f"A{39 + d}"] = "4. Địa điểm giao hàng: " + dk.get("dia_diem", "tại kho của Quý khách") + "."
     ws[f"A{40 + d}"] = "5. Thanh toán: " + dk.get("thanh_toan", "chuyển khoản, 100% khi nhận hàng") + "."
+    rong_ca_trang = sum(ws.column_dimensions[c].width or 10 for c in "ABCDEFG")
+    for r in range(36 + d, 41 + d):
+        ws.row_dimensions[r].height = max(18, 13 * _so_dong_chu(ws[f"A{r}"].value, rong_ca_trang) + 4)
 
     wb.calculation.fullCalcOnLoad = True
     duong_dan_ra = Path(duong_dan_ra)
