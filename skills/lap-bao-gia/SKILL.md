@@ -1,11 +1,13 @@
 ---
 name: lap-bao-gia
-description: Lập bảng báo giá theo mẫu Excel chuẩn cho các công ty người dùng quản lý (hiện có Công ty CP Thương mại Tổng hợp Minh Phát và Công ty TNHH Kỹ thuật Công trình BLT), mỗi công ty có tên, logo, MST, tài khoản riêng (có logo, thông tin công ty, bảng hàng hóa, thuế GTGT, số tiền bằng chữ, điều khoản, chỗ ký) rồi xuất file Excel và PDF để gửi khách qua Zalo/Email. Dùng skill này mỗi khi người dùng muốn làm, soạn, lập, gửi, sửa hoặc in báo giá / bảng giá / phiếu báo giá / chào giá cho khách hàng, kể cả khi họ chỉ liệt kê tên khách và vài mặt hàng kèm giá (ví dụ "báo giá cho cty ABC 50 ram giấy A4 giá 75k"), hoặc dán danh sách hàng từ tin nhắn, ảnh chụp, file Excel khác. Làm được cả bản song ngữ Việt – Trung (报价单) khi khách là công ty Trung Quốc hoặc người dùng xin "bản song ngữ", "tiếng Trung", "中文". Cũng dùng khi người dùng muốn thêm một công ty mới để làm báo giá, hoặc tạo mẫu báo giá trống cho một công ty.
+description: Lập bảng báo giá Excel trình bày chuyên nghiệp cho các công ty người dùng quản lý (hiện có Công ty CP Thương mại Tổng hợp Minh Phát và Công ty TNHH Kỹ thuật Công trình BLT), mỗi công ty có tên, logo, MST, tài khoản riêng (có logo, thông tin công ty, bảng hàng hóa, thuế GTGT, số tiền bằng chữ, điều khoản, chỗ ký) rồi xuất file Excel và PDF để gửi khách qua Zalo/Email. Dùng skill này mỗi khi người dùng muốn làm, soạn, lập, gửi, sửa hoặc in báo giá / bảng giá / phiếu báo giá / chào giá cho khách hàng, kể cả khi họ chỉ liệt kê tên khách và vài mặt hàng kèm giá (ví dụ "báo giá cho cty ABC 50 ram giấy A4 giá 75k"), hoặc dán danh sách hàng từ tin nhắn, ảnh chụp, file Excel khác. Làm được cả bản song ngữ Việt – Trung (报价单) khi khách là công ty Trung Quốc hoặc người dùng xin "bản song ngữ", "tiếng Trung", "中文". Cũng dùng khi người dùng muốn thêm một công ty mới để làm báo giá, hoặc tạo mẫu báo giá trống cho một công ty.
 ---
 
 # Lập báo giá
 
-Skill này điền mẫu báo giá chuẩn (`assets/Mau-bao-gia-goc.xlsx`) bằng script `scripts/tao_bao_gia.py`. Script tự làm những việc dễ sai khi làm tay: đánh STT, tính thành tiền, cộng tiền, tính thuế GTGT, **đọc số tiền bằng chữ tiếng Việt**, thêm dòng khi có hơn 12 mặt hàng, ẩn dòng trống, và xuất PDF chỉ gồm trang báo giá.
+Script `scripts/tao_bao_gia.py` dựng bảng báo giá Excel từ đầu theo một bố cục chuyên nghiệp cố định: đầu trang có logo bên trái và thông tin công ty bên phải trên đường kẻ hai màu, tiêu đề lớn, hai khung "Thông tin khách hàng" và "Thông tin báo giá", dải "Công trình", bảng hàng có tiêu đề nền màu, dòng xen màu và nhóm hàng (I, II...), khối tổng tiền nổi bật, điều khoản thương mại, chỗ ký hai bên, chân trang có số trang. Màu chủ đạo lấy theo hồ sơ công ty.
+
+Script cũng tự làm những việc dễ sai khi làm tay: đánh STT, công thức thành tiền/tổng/thuế (sửa số trong Excel là tự tính lại), **đọc số tiền bằng chữ**, giãn dòng theo nội dung, ngắt trang không cắt ngang nhóm hàng/khối tổng/chữ ký, và xuất PDF.
 
 Người dùng thường là nhân viên văn phòng/kế toán, không rành kỹ thuật. Hãy trả lời bằng tiếng Việt, ngắn gọn, không nói về JSON hay script trừ khi họ hỏi.
 
@@ -37,7 +39,8 @@ Khi người dùng gửi thông tin một công ty mới (gõ tay, ảnh danh th
   "so_tai_khoan": "...", "ngan_hang": "...",
   "chu_tai_khoan": "CT TNHH KY THUAT CONG TRINH BLT",
   "nguoi_ky": "HỒ VĂN BÌNH", "chuc_vu": "Giám đốc",
-  "logo": "blt.png", "logo_tam": true
+  "logo": "blt.png", "logo_tam": true,
+  "mau": {"chinh": "0D2B66", "nhan": "F7931E"}
 }
 ```
 
@@ -45,6 +48,7 @@ Khi người dùng gửi thông tin một công ty mới (gõ tay, ảnh danh th
 - `website` để `""` nếu không có, khi đó đầu trang chỉ ghi email.
 - `chu_tai_khoan`: ghi đúng tên chủ tài khoản ngân hàng nếu khác tên công ty (thường là tên không dấu, viết tắt). Bỏ trống thì dùng tên công ty.
 - Viết hoa chữ cái đầu cho tên đường, phường, tỉnh; nhóm số điện thoại cho dễ đọc. Giữ nguyên số MST và số tài khoản.
+- `mau`: màu chủ đạo (`chinh`: nền tiêu đề bảng, khối tổng, chữ tiêu đề) và màu nhấn (`nhan`: đường kẻ mảnh) dạng mã hex, nên lấy theo màu logo. Bỏ trống thì dùng xanh đậm + vàng đồng. Chọn `chinh` đủ đậm để chữ trắng trên nền đọc rõ.
 - Logo: nếu người dùng gửi ảnh logo thì lưu vào `assets/logo/<ma>.png` và đặt `"logo_tam": false`. Nếu chưa có, tạo logo tạm hình tròn có chữ viết tắt (theo kiểu `logo/minh-phat.png`) và đặt `"logo_tam": true`. **Không được để logo của công ty khác** trên báo giá.
 
 Sau đó tạo mẫu trống để người dùng xem trước:
@@ -106,13 +110,16 @@ Cách hiểu cách viết tắt hay gặp:
 }
 ```
 
-- `cong_trinh` (tùy chọn): khi báo giá cho một công trình/dự án, ghi tên hạng mục + công trình; nó được đưa vào lời mở đầu ("...xin gửi tới Quý khách bảng báo giá <cong_trinh> như sau:").
+- `cong_trinh` (tùy chọn): khi báo giá cho một công trình/dự án, ghi tên hạng mục + công trình; nó hiện thành dải "CÔNG TRÌNH" dưới hai khung thông tin.
+- `nhom` (tùy chọn, trong từng mặt hàng): tên nhóm hàng, ví dụ "Tủ điện, tủ điều khiển", "Cáp điện". Các mặt hàng liền nhau cùng nhóm được gom dưới một dòng tiêu đề nhóm đánh số La Mã. Nên chia nhóm khi có từ khoảng 10 mặt hàng trở lên thuộc nhiều loại, vì bảng dễ đọc hơn hẳn.
+- `hieu_luc_ngay` (tùy chọn, mặc định 30): số ngày hiệu lực, hiện trong khung "Thông tin báo giá" và điều khoản 2.
+- `dieu_khoan.them` (tùy chọn): danh sách điều khoản bổ sung, ví dụ `["Bảo hành 12 tháng theo tiêu chuẩn nhà sản xuất"]`.
 - `cong_ty`: mã hoặc tên gọi của công ty báo giá (`"blt"`, `"Minh Phát"`). Muốn đổi tạm một trường cho riêng báo giá này thì dùng dạng `{"ma": "blt", "nguoi_ky": "..."}`.
 
 - `so_luong` và `don_gia` phải là **số** (72000), không phải chuỗi ("72.000đ"), vì Excel cần số để tính.
 - `ngay` nhận `2026-10-10` hoặc `10/10/2026`.
 - `vat` nhận `10` hoặc `0.1`.
-- Mọi trường trong `dieu_khoan` đều tùy chọn: chỉ ghi những gì người dùng nêu. Các điều khoản được nối sau tiêu đề sẵn có (ví dụ "3. Thời gian giao hàng: " + giá trị), nên không cần lặp lại tiêu đề hay dấu chấm cuối câu.
+- Mọi trường trong `dieu_khoan` đều tùy chọn: chỉ ghi những gì người dùng nêu. Các điều khoản được nối sau tiêu đề sẵn có (ví dụ "Thời gian giao hàng: " + giá trị), nên không cần lặp lại tiêu đề hay dấu chấm cuối câu. Điều khoản cuối luôn là thông tin chuyển khoản lấy từ hồ sơ công ty.
 
 ### 3. Chạy script
 
@@ -124,7 +131,7 @@ Cần `openpyxl` (`pip install openpyxl` nếu thiếu). Có LibreOffice thì xu
 
 Đặt tên file không dấu, không khoảng trắng, ví dụ `Bao-gia-Cong-ty-ABC-BG-2026-015.xlsx`, để gửi qua Zalo/Email không bị lỗi tên.
 
-Script in ra kết quả gồm: tên công ty báo giá, `logo_tam`, tổng tiền hàng, tiền thuế, tổng cộng, số tiền bằng chữ, và `thong_tin_cong_ty_con_trong` (các ô thông tin công ty vẫn còn chữ mẫu trong ngoặc vuông `[ ]`).
+Script in ra kết quả gồm: tên công ty báo giá, `logo_tam`, tổng tiền hàng, tiền thuế, tổng cộng, số tiền bằng chữ, và `thong_tin_cong_ty_con_trong` (các trường hồ sơ công ty còn trống hoặc còn chữ mẫu `[ ]`).
 
 ### 4. Kiểm tra và gửi kết quả
 
@@ -133,7 +140,7 @@ Script in ra kết quả gồm: tên công ty báo giá, `logo_tam`, tổng ti�
   - Công ty báo giá, số báo giá, tên khách, số mặt hàng
   - Cộng tiền hàng / Thuế GTGT / **Tổng cộng** và số tiền bằng chữ
   - Những gì đã tự giả định (số báo giá tự đặt, ĐVT tự suy ra, giá đã quy đổi về chưa VAT...)
-- **Nếu `thong_tin_cong_ty_con_trong` không rỗng**, nhắc người dùng rằng địa chỉ, MST, số tài khoản... của công ty vẫn là chữ mẫu, khách sẽ thấy điều đó trên báo giá. Mời họ gửi thông tin thật để điền vào (bằng mục `cong_ty`). Đây là lỗi dễ khiến báo giá gửi khách trông thiếu chuyên nghiệp, nên đừng bỏ qua. Tương tự, nếu `logo_tam` là true thì nhắc một câu rằng logo đang là logo tạm và mời họ gửi logo thật.
+- **Nếu `thong_tin_cong_ty_con_trong` không rỗng**, nhắc người dùng rằng địa chỉ, MST, số tài khoản... của công ty còn thiếu, khách sẽ thấy điều đó trên báo giá. Mời họ gửi thông tin thật để điền vào (bằng mục `cong_ty`). Đây là lỗi dễ khiến báo giá gửi khách trông thiếu chuyên nghiệp, nên đừng bỏ qua. Tương tự, nếu `logo_tam` là true thì nhắc một câu rằng logo đang là logo tạm và mời họ gửi logo thật.
 
 ## Bản song ngữ Việt – Trung
 
@@ -154,7 +161,7 @@ Khi người dùng cần báo giá song ngữ (khách Trung Quốc, BOQ song ng�
 - Nếu file của khách đã có tên tiếng Trung (BOQ song ngữ), **dùng đúng thuật ngữ gốc của khách** cho `ten_zh` thay vì tự dịch, vì khách sẽ đối chiếu với bảng của họ.
 - Tên hãng (ABB, Schneider, LS...) chỉ ghi bằng chữ Latin trong `ghi_chu`, không cần `ghi_chu_zh`, vì hai bên đều đọc được.
 - Tên công ty, địa chỉ giữ nguyên tiếng Việt (tên pháp lý). Chức vụ người ký tự dịch (Giám đốc → 总经理); muốn khác thì thêm `chuc_vu_zh` vào hồ sơ công ty.
-- Bản song ngữ dài hơn. Nếu trang cuối chỉ còn vài dòng, đặt `"so_trang": <số trang>` để thu nhỏ vừa, rồi xem lại PDF để chắc chữ vẫn đọc rõ.
+- Bản song ngữ dài hơn. Script tự thu nhỏ nhẹ khi trang cuối quá ít nội dung; muốn ép số trang thì đặt `"so_trang": <số trang>`, rồi xem lại PDF để chắc chữ vẫn đọc rõ.
 
 ## Báo giá từ bảng khối lượng (BOQ) của khách
 
@@ -167,6 +174,8 @@ Khách công trình thường gửi file Excel bảng khối lượng (có khi s
 
 ## Ghi chú
 
-- Mẫu có sẵn 12 dòng hàng. Nhiều hơn thì script tự chèn thêm dòng. Dòng có tên dài tự cao lên cho đủ chữ; bảng dài thì báo giá tự chia nhiều trang và lặp lại dòng tiêu đề bảng.
-- Khi người dùng gửi logo thật, lưu đè vào `assets/logo/<ma>.png` và đổi `logo_tam` thành false trong hồ sơ công ty. Ảnh chụp màn hình thường có viền tối và nhiều nền thừa: cắt sát nội dung logo (chừa lề nhỏ) để logo hiện to, rõ. Script tự giữ đúng tỉ lệ ảnh (cao ~100px ở góc trên trái), và tự thu nhỏ chữ địa chỉ nếu quá dài để không đè lên logo; vẫn nên xem lại PDF.
+- Số dòng hàng không giới hạn. Bảng dài tự chia nhiều trang, lặp lại dòng tiêu đề bảng, và tự ngắt trang để tiêu đề nhóm, khối tổng tiền, khối chữ ký không bị tách.
+- `--mau <ma>` tạo mẫu trống (15 dòng hàng có sẵn công thức, chỗ điền bằng dấu chấm, kèm trang "Hướng dẫn") cho người dùng tự điền trong Excel; thêm `--song-ngu` để có mẫu song ngữ.
+- Khi người dùng gửi logo thật, lưu đè vào `assets/logo/<ma>.png` và đổi `logo_tam` thành false trong hồ sơ công ty. Ảnh chụp màn hình thường có viền tối và nhiều nền thừa: cắt sát nội dung logo (chừa lề nhỏ) để logo hiện to, rõ. Script tự giữ đúng tỉ lệ ảnh (cao ~92px ở góc trên trái) và tự thu nhỏ chữ dòng địa chỉ nếu quá dài; vẫn nên xem lại PDF.
+- Người dùng chê mẫu "chưa đẹp": hỏi cụ thể muốn đổi gì (màu, cỡ chữ, bố cục) rồi sửa trong lớp `BangBaoGia` của script, để mọi báo giá sau đều được hưởng, thay vì sửa tay một file Excel.
 - Khi người dùng muốn **sửa báo giá vừa làm** (đổi giá, thêm hàng...), sửa file JSON rồi chạy lại script. Cách này nhanh hơn và ít lỗi hơn sửa trực tiếp file Excel.

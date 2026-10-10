@@ -1,6 +1,9 @@
 {
   "ma": "blt",
-  "ten_goi": ["BLT", "Kỹ thuật Công trình BLT"],
+  "ten_goi": [
+    "BLT",
+    "Kỹ thuật Công trình BLT"
+  ],
   "ten": "CÔNG TY TNHH KỸ THUẬT CÔNG TRÌNH BLT",
   "dia_chi": "Số 2A đường Nguyễn Khánh Toàn, khối Trường Phúc, phường Trường Vinh, tỉnh Nghệ An, Việt Nam",
   "mst": "2902269718",
@@ -13,5 +16,9 @@
   "nguoi_ky": "HỒ VĂN BÌNH",
   "chuc_vu": "Giám đốc",
   "logo": "blt.png",
-  "logo_tam": false
+  "logo_tam": false,
+  "mau": {
+    "chinh": "0D2B66",
+    "nhan": "F7931E"
+  }
 }
