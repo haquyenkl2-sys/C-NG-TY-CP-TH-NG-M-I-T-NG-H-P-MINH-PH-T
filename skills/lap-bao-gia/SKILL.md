@@ -79,7 +79,8 @@ Chỉ hỏi khi thiếu thông tin bắt buộc. Gom các câu hỏi vào **mộ
 Cách hiểu cách viết tắt hay gặp:
 - "75k" = 75.000; "1tr2" hoặc "1,2tr" = 1.200.000.
 - Dấu chấm/phẩy là phân cách hàng nghìn kiểu Việt Nam: "1.250.000" = 1250000.
-- **Đơn giá trong mẫu là giá chưa thuế.** Nếu người dùng đưa giá *đã gồm VAT*, đổi ra giá chưa thuế (giá ÷ 1,1 hoặc ÷ 1,08, làm tròn đến đồng) và nói rõ cho họ biết đã quy đổi.
+- **Đơn giá mặc định là giá chưa thuế**, bảng tự cộng dòng thuế GTGT. Nếu người dùng đưa giá *đã gồm VAT* hoặc yêu cầu tính giá theo kiểu "giá có thuế rồi nhân thêm X%", đặt `"gia_da_gom_vat": true` và `"vat": <thuế suất đã gồm>`: khối tổng ghi "Cộng tiền hàng (đã bao gồm thuế GTGT 8%)", không cộng thuế lần nữa, điều khoản 1 tự ghi "Đơn giá trên đã bao gồm thuế GTGT 8%". Đừng để khách bị tính thuế hai lần.
+- Tính giá từ hóa đơn đầu vào (giá mua chưa thuế × (1 + thuế suất) × (1 + % lợi nhuận)...): tính bằng code, làm tròn đơn giá đến đồng, và ghi rõ cách tính cho người dùng.
 - Không có ĐVT thì suy ra hợp lý (giấy → Ram, mực → Hộp, thùng nước → Thùng...). Không chắc thì để "Cái".
 
 ### 2. Ghi dữ liệu ra file JSON

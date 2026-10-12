@@ -61,6 +61,7 @@ NHAN = {
     "thanh_tien": ("Thành tiền\n(VNĐ)", "金额(越南盾)"),
     "ghi_chu": ("Ghi chú", "备注"),
     "cong": ("Cộng tiền hàng (chưa VAT)", "货款合计（不含税）"),
+    "cong_gom_vat": ("Cộng tiền hàng (đã bao gồm thuế GTGT {p})", "货款合计（含增值税{p}）"),
     "vat": ("Thuế GTGT (VAT)", "增值税"),
     "tong": ("TỔNG CỘNG THANH TOÁN", "付款总额"),
     "bang_chu": ("Bằng chữ", "大写金额"),
@@ -510,25 +511,33 @@ class BangBaoGia:
         self.r += 1
         return r
 
-    def tong_tien(self, dong_dau, dong_cuoi, vat, tong_cong=None):
+    def tong_tien(self, dong_dau, dong_cuoi, vat, tong_cong=None, da_gom_vat=False):
+        """da_gom_vat=True: đơn giá đã gồm thuế GTGT, nên không cộng thêm dòng thuế."""
         ws = self.ws
         tren = Side(style="medium", color=self.chinh)
         r1 = self.r
         dam = self.font(10, dam=True)
-        self.o(f"A{r1}:E{r1}", self.nhan("cong"), dam, can="right", vien=Border(top=tren))
+        nhan_cong = self.nhan("cong_gom_vat" if da_gom_vat else "cong").replace("{p}", f"{vat:.0%}")
+        self.o(f"A{r1}:E{r1}", nhan_cong, dam, can="right", vien=Border(top=tren))
         self.o(f"F{r1}", f"=SUM(F{dong_dau}:F{dong_cuoi})", dam, can="right", vien=Border(top=tren),
                dinh_dang="#,##0")
         self.o(f"G{r1}", None, vien=Border(top=tren))
         self.cao(20, r1)
-        r2 = r1 + 1
-        self.o(f"A{r2}:D{r2}", self.nhan("vat"), self.font(10), can="right")
-        self.o(f"E{r2}", vat, self.font(10), can="center", dinh_dang="0%")
-        self.o(f"F{r2}", f"=ROUND(F{r1}*E{r2},0)", self.font(10), can="right", dinh_dang="#,##0")
-        self.cao(20, r2)
-        r3 = r2 + 1
+        if da_gom_vat:
+            r2 = None
+            r3 = r1 + 1
+            cong_thuc_tong = f"=F{r1}"
+        else:
+            r2 = r1 + 1
+            self.o(f"A{r2}:D{r2}", self.nhan("vat"), self.font(10), can="right")
+            self.o(f"E{r2}", vat, self.font(10), can="center", dinh_dang="0%")
+            self.o(f"F{r2}", f"=ROUND(F{r1}*E{r2},0)", self.font(10), can="right", dinh_dang="#,##0")
+            self.cao(20, r2)
+            r3 = r2 + 1
+            cong_thuc_tong = f"=F{r1}+F{r2}"
         trang = self.font(11.5, dam=True, mau="FFFFFF")
         self.o(f"A{r3}:E{r3}", self.nhan("tong"), trang, can="right", nen=self.chinh)
-        self.o(f"F{r3}", f"=F{r1}+F{r2}", trang, can="right", nen=self.chinh, dinh_dang="#,##0")
+        self.o(f"F{r3}", cong_thuc_tong, trang, can="right", nen=self.chinh, dinh_dang="#,##0")
         self.o(f"G{r3}", None, nen=self.chinh)
         self.cao(24, r3)
         r4 = r3 + 1
@@ -695,7 +704,7 @@ def ve_bao_gia(du_lieu, ct, mau_trong=False):
     so_bg = du_lieu.get("so_bao_gia") or f"BG-{ngay:%Y}/{ngay:%m%d}"
     hieu_luc_ngay = du_lieu.get("hieu_luc_ngay", 30)
     cham = "................................"
-    trai = [(b.nhan("kinh_gui"), kh.get("ten") or (cham if mau_trong else ""), True),
+    trai = [(b.nhan("kinh_gui"), kh.get("ten") or cham, True),
             (b.nhan("nguoi_lien_he"), kh.get("nguoi_lien_he") or (cham if mau_trong else ""), False),
             (b.nhan("dien_thoai"), kh.get("dien_thoai") or (cham if mau_trong else ""), False),
             (b.nhan("email"), kh.get("email") or (cham if mau_trong else ""), False),
@@ -737,10 +746,16 @@ def ve_bao_gia(du_lieu, ct, mau_trong=False):
     dong_cuoi = b.r - 1
 
     vat = _ty_le_vat(du_lieu.get("vat", 0.1))
-    tien_thue = round(tong_hang * vat)
+    da_gom_vat = bool(du_lieu.get("gia_da_gom_vat"))
+    tien_thue = 0 if da_gom_vat else round(tong_hang * vat)
     tong_cong = tong_hang + tien_thue
-    b.tong_tien(dong_dau, dong_cuoi, vat, None if mau_trong else tong_cong)
-    b.dieu_khoan(du_lieu.get("dieu_khoan") or {}, du_lieu.get("dieu_khoan_zh") or {}, hieu_luc_ngay)
+    b.tong_tien(dong_dau, dong_cuoi, vat, None if mau_trong else tong_cong, da_gom_vat)
+    dk = dict(du_lieu.get("dieu_khoan") or {})
+    dk_zh = dict(du_lieu.get("dieu_khoan_zh") or {})
+    if da_gom_vat:
+        dk.setdefault("thue", f"Đơn giá trên đã bao gồm thuế GTGT {vat:.0%}")
+        dk_zh.setdefault("thue", f"以上单价已含{vat:.0%}增值税")
+    b.dieu_khoan(dk, dk_zh, hieu_luc_ngay)
     b.cho_ky()
     b.hoan_thien(du_lieu.get("so_trang"))
 
@@ -773,6 +788,7 @@ def ve_bao_gia(du_lieu, ct, mau_trong=False):
             "so_mat_hang": len(hang),
             "cong_tien_hang": tong_hang,
             "thue_suat": vat,
+            "gia_da_gom_vat": da_gom_vat,
             "tien_thue": tien_thue,
             "tong_cong": tong_cong,
             "bang_chu": so_thanh_chu(tong_cong),
