@@ -11,6 +11,17 @@ Script cũng tự làm những việc dễ sai khi làm tay: đánh STT, công t
 
 Người dùng thường là nhân viên văn phòng/kế toán, không rành kỹ thuật. Hãy trả lời bằng tiếng Việt, ngắn gọn, không nói về JSON hay script trừ khi họ hỏi.
 
+## Hai kiểu mẫu
+
+| Kiểu | Dùng khi | Đặc điểm |
+|---|---|---|
+| `xay-dung` | Báo giá **thi công công trình** (mặc định của BLT) | Mẫu truyền thống, Times New Roman, đen trắng: logo + số báo giá bên trái, tên/địa chỉ công ty bên phải, "BẢNG BÁO GIÁ" giữa trang, "Kính gửi" + người liên hệ, "…xin trân trọng báo giá thi công công trình: … tại địa điểm: …", bảng STT / Nội dung công việc / ĐVT / Khối lượng (tạm tính) / Đơn giá / Thành tiền có hạng mục La Mã, Tổng cộng, (Bằng chữ), Ghi chú gạch đầu dòng, hiệu lực đến ngày cụ thể, thông tin liên hệ, "Trân trọng kính chào!", ngày lập + chữ ký bên phải |
+| `hien-dai` | Báo giá hàng hóa, gửi khách cần trình bày hiện đại (mặc định của công ty không đặt `kieu_mac_dinh`) | Màu theo logo, hai khung "Bên báo giá"/"Kính gửi khách hàng", tiêu đề + số/ngày/hiệu lực ở góc phải, cột Ghi chú, khối tổng nền màu |
+
+Chọn kiểu bằng `"kieu"` trong JSON hoặc `--kieu`; bỏ trống thì dùng `kieu_mac_dinh` trong hồ sơ công ty. Người dùng gửi ảnh một mẫu báo giá và bảo "làm theo mẫu này": so với hai kiểu trên, chọn kiểu gần nhất; nếu khác nhiều thì thêm kiểu mới (lớp con của `BangBaoGia`, như `BangBaoGiaXayDung`) thay vì sửa tay file Excel.
+
+Kiểu `xay-dung` dùng thêm: `dia_diem` / `dia_diem_zh` (địa điểm thi công, hiện trong câu mở đầu), hồ sơ công ty `ten_viet_thuong` ("Công ty TNHH ..." viết thường cho câu văn) và `noi_lap` (nơi lập, vd "Nghệ An", dùng cho dòng "Nghệ An, ngày … tháng … năm …").
+
 ## Các công ty đã lưu
 
 Mỗi công ty là một file hồ sơ trong `assets/cong-ty/` (logo ở `assets/logo/`). Xem danh sách bằng:
@@ -45,6 +56,7 @@ Khi người dùng gửi thông tin một công ty mới (gõ tay, ảnh danh th
 ```
 
 - `ma`: chữ thường, không dấu, ngắn. `ten_goi`: các cách người dùng hay gọi công ty.
+- `ten_zh`, `dia_chi_zh`: tên và địa chỉ tiếng Trung (dùng ở bản song ngữ). Khách hàng cũng có thể có `ten_zh`.
 - `website` để `""` nếu không có, khi đó đầu trang chỉ ghi email.
 - `chu_tai_khoan`: ghi đúng tên chủ tài khoản ngân hàng nếu khác tên công ty (thường là tên không dấu, viết tắt). Bỏ trống thì dùng tên công ty.
 - Viết hoa chữ cái đầu cho tên đường, phường, tỉnh; nhóm số điện thoại cho dễ đọc. Giữ nguyên số MST và số tài khoản.

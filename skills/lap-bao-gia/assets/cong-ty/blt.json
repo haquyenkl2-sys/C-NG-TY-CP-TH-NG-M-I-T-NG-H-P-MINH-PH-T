@@ -5,7 +5,11 @@
     "Kỹ thuật Công trình BLT"
   ],
   "ten": "CÔNG TY TNHH KỸ THUẬT CÔNG TRÌNH BLT",
+  "ten_zh": "BLT工程技术有限公司",
+  "ten_viet_thuong": "Công ty TNHH Kỹ thuật Công trình BLT",
   "dia_chi": "Số 2A đường Nguyễn Khánh Toàn, khối Trường Phúc, phường Trường Vinh, tỉnh Nghệ An, Việt Nam",
+  "dia_chi_zh": "越南义安省长荣坊长福区阮庆全路2A号",
+  "noi_lap": "Nghệ An",
   "mst": "2902269718",
   "dien_thoai": "0984 586 089",
   "email": "hobinh150589@gmail.com",
@@ -20,5 +24,6 @@
   "mau": {
     "chinh": "0D2B66",
     "nhan": "F7931E"
-  }
+  },
+  "kieu_mac_dinh": "xay-dung"
 }
