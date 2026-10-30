@@ -115,6 +115,13 @@ Cách hiểu cách viết tắt hay gặp:
 - `nhom` (tùy chọn, trong từng mặt hàng): tên nhóm hàng, ví dụ "Tủ điện, tủ điều khiển", "Cáp điện". Các mặt hàng liền nhau cùng nhóm được gom dưới một dòng tiêu đề nhóm đánh số La Mã. Nên chia nhóm khi có từ khoảng 10 mặt hàng trở lên thuộc nhiều loại, vì bảng dễ đọc hơn hẳn.
 - `hieu_luc_ngay` (tùy chọn, mặc định 30): số ngày hiệu lực, hiện trong khung "Thông tin báo giá" và điều khoản 2.
 - `dieu_khoan.them` (tùy chọn): danh sách điều khoản bổ sung, ví dụ `["Bảo hành 12 tháng theo tiêu chuẩn nhà sản xuất"]`.
+- `khach_hang.mst` (tùy chọn): mã số thuế của khách, hiện ngay dưới tên khách.
+- `nhan_dieu_khoan` (tùy chọn): đổi nhãn điều khoản cho báo giá **thi công/dịch vụ**, ví dụ `{"giao_hang": ["Thời gian thi công: ", "施工时间："], "dia_diem": ["Địa điểm thi công: ", "施工地点："]}`. Bản dịch tiếng Trung cho điều khoản bổ sung đặt ở `dieu_khoan_zh.them` (cùng thứ tự).
+- Giá trọn gói đã gồm VAT nhưng không rõ thuế suất: `"gia_da_gom_vat": true` và **bỏ trống** `vat`, bảng ghi "đã bao gồm thuế GTGT" mà không nêu %.
+
+### Báo giá từ hợp đồng
+
+Khi người dùng gửi hợp đồng (Word/PDF) và nhờ làm báo giá theo đó: lấy bên A làm khách hàng (tên, MST, người đại diện, điện thoại, địa chỉ), các hạng mục ở điều "Phạm vi công việc", giá trị hợp đồng, thời gian, địa điểm, thanh toán và bảo hành từ các điều tương ứng. Nếu hợp đồng chỉ có một giá trọn gói, chia giá cho từng hạng mục theo tỉ lệ người dùng nêu (bằng code, để tổng khớp đúng giá hợp đồng) và mỗi hạng mục ghi ĐVT "Hạng mục", số lượng 1. Hợp đồng song ngữ thì làm cả bản song ngữ, dùng đúng thuật ngữ tiếng Trung trong hợp đồng.
 - `cong_ty`: mã hoặc tên gọi của công ty báo giá (`"blt"`, `"Minh Phát"`). Muốn đổi tạm một trường cho riêng báo giá này thì dùng dạng `{"ma": "blt", "nguoi_ky": "..."}`.
 
 - `so_luong` và `don_gia` phải là **số** (72000), không phải chuỗi ("72.000đ"), vì Excel cần số để tính.

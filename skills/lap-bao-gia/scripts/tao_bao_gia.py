@@ -34,7 +34,7 @@ THU_MUC_LOGO = ASSETS / "logo"
 CONG_TY_MAC_DINH = "minh-phat"
 
 PHONG = "Arial"
-DO_RONG_COT = {"A": 5.5, "B": 40, "C": 8, "D": 9, "E": 14.5, "F": 16.5, "G": 14}
+DO_RONG_COT = {"A": 5.5, "B": 38.5, "C": 9.5, "D": 9, "E": 14.5, "F": 16.5, "G": 14}
 MAU_MAC_DINH = {"chinh": "1F3864", "nhan": "C9A227"}  # xanh đậm + vàng đồng
 SO_DONG_TRONG_MAU = 15  # số dòng hàng trống khi tạo mẫu (--mau)
 
@@ -44,6 +44,7 @@ NHAN = {
     "khach_hang": ("THÔNG TIN KHÁCH HÀNG", "客户信息"),
     "bao_gia": ("THÔNG TIN BÁO GIÁ", "报价信息"),
     "kinh_gui": ("Kính gửi", "致"),
+    "mst": ("MST", "税号"),
     "nguoi_lien_he": ("Người liên hệ", "联系人"),
     "dien_thoai": ("Điện thoại", "电话"),
     "email": ("Email", "邮箱"),
@@ -247,14 +248,15 @@ def so_la_ma(n):
 # ---------------------------------------------------------------------------
 def _do_dai(chu):
     """Độ rộng hiển thị: chữ Hán/Trung chiếm gấp ~1,7 chữ Latin."""
-    return sum(1.7 if unicodedata.east_asian_width(c) in "WF" else 1 for c in chu)
+    return sum(1.85 if unicodedata.east_asian_width(c) in "WF" else 1 for c in chu)
 
 
 def _so_dong_chu(chu, do_rong_cot, co_chu=10):
     """Ước lượng số dòng của ô tự xuống dòng (Arial, cỡ co_chu)."""
     if not chu:
         return 1
-    ky_tu_moi_dong = max(4, do_rong_cot * 1.15 * 10 / co_chu - 1)
+    # trừ lề ô (~1,5 đơn vị) để cột hẹp như ĐVT không bị ước lượng thiếu dòng
+    ky_tu_moi_dong = max(3, (do_rong_cot - 1.5) * 1.12 * 10 / co_chu)
     tong = 0
     for doan in str(chu).split("\n"):
         dong, dai = 1, 0
@@ -517,7 +519,8 @@ class BangBaoGia:
         tren = Side(style="medium", color=self.chinh)
         r1 = self.r
         dam = self.font(10, dam=True)
-        nhan_cong = self.nhan("cong_gom_vat" if da_gom_vat else "cong").replace("{p}", f"{vat:.0%}")
+        p = f"{vat:.0%}" if vat is not None else ""
+        nhan_cong = self.nhan("cong_gom_vat" if da_gom_vat else "cong").replace("{p}", p).replace(" )", ")")
         self.o(f"A{r1}:E{r1}", nhan_cong, dam, can="right", vien=Border(top=tren))
         self.o(f"F{r1}", f"=SUM(F{dong_dau}:F{dong_cuoi})", dam, can="right", vien=Border(top=tren),
                dinh_dang="#,##0")
@@ -555,7 +558,9 @@ class BangBaoGia:
         self.cach(12)
         return r1, r2, r3
 
-    def dieu_khoan(self, dk, dk_zh, hieu_luc_ngay):
+    def dieu_khoan(self, dk, dk_zh, hieu_luc_ngay, nhan_rieng=None):
+        """nhan_rieng: đổi nhãn điều khoản, vd {"giao_hang": ["Thời gian thi công: ", "施工时间："]}."""
+        nhan_rieng = nhan_rieng or {}
         ws = self.ws
         self.khoi.append((self.r, self.r + 1))
         self.o(f"A{self.r}:G{self.r}", self.nhan("dieu_khoan"), self.font(10.5, dam=True, mau=self.chinh),
@@ -564,11 +569,14 @@ class BangBaoGia:
         self.r += 1
         ds = []
         for khoa, nhan_vi, nhan_zh, md_vi, md_zh in DIEU_KHOAN:
+            nhan_vi, nhan_zh = nhan_rieng.get(khoa, (nhan_vi, nhan_zh))
             viet = (dk.get(khoa) or md_vi.format(n=hieu_luc_ngay)).rstrip(".")
             trung = (dk_zh.get(khoa) or md_zh.format(n=hieu_luc_ngay)).rstrip("。")
             ds.append((nhan_vi + viet + ".", nhan_zh + trung + "。"))
-        for them in dk.get("them", []):
-            ds.append((them.rstrip(".") + ".", ""))
+        them_zh = list(dk_zh.get("them", []))
+        for i, them in enumerate(dk.get("them", [])):
+            trung = them_zh[i].rstrip("。") + "。" if i < len(them_zh) else ""
+            ds.append((them.rstrip(".") + ".", trung))
         ct = self.ct
         chu_tk = ct.get("chu_tai_khoan") or ct.get("ten", "")
         tk = (f"Thông tin chuyển khoản: Số TK {ct.get('so_tai_khoan', '')} – {ct.get('ngan_hang', '')} – "
@@ -653,7 +661,10 @@ class BangBaoGia:
             ws.page_setup.fitToHeight = int(so_trang)
         else:
             trang, lap_day, ngat_dong = self._mo_phong_trang(ty_le)
-            if trang > 1 and lap_day < 0.3:
+            # Quyết định thu nhỏ dựa trên lượng nội dung thật (chưa tính ngắt trang chủ động)
+            trang_tn, lap_day_tn, _ = self._mo_phong_trang(ty_le, ngat=False)
+            if trang_tn > 1 and lap_day_tn <= 0.2 * (trang_tn - 1):
+                trang = trang_tn
                 # Trang cuối chỉ còn ít nội dung: thu nhỏ nhẹ cho vừa ít trang hơn
                 ws.page_setup.fitToHeight = trang - 1
             else:
@@ -705,13 +716,16 @@ def ve_bao_gia(du_lieu, ct, mau_trong=False):
     hieu_luc_ngay = du_lieu.get("hieu_luc_ngay", 30)
     cham = "................................"
     trai = [(b.nhan("kinh_gui"), kh.get("ten") or cham, True),
+            (b.nhan("mst"), kh.get("mst") or "", False),
             (b.nhan("nguoi_lien_he"), kh.get("nguoi_lien_he") or (cham if mau_trong else ""), False),
             (b.nhan("dien_thoai"), kh.get("dien_thoai") or (cham if mau_trong else ""), False),
             (b.nhan("email"), kh.get("email") or (cham if mau_trong else ""), False),
             (b.nhan("dia_chi"), kh.get("dia_chi") or (cham if mau_trong else ""), False)]
     if not mau_trong:
         # Giữ đủ nhãn để khung có cấu trúc (khách có thể ghi tay); bỏ Email nếu trống cho gọn
-        trai = [x for x in trai if x[1] or x is not trai[3]]
+        trai = [x for x in trai if x[1] or x[0] not in (b.nhan("email"), b.nhan("mst"))]
+    else:
+        trai = [x for x in trai if x[0] != b.nhan("mst")]
     hl = f"{hieu_luc_ngay} ngày" + (f" / {hieu_luc_ngay}天" if song_ngu else "")
     phai = [(b.nhan("so"), so_bg if not mau_trong else "BG-....../......", True),
             (b.nhan("ngay"), ngay.strftime("%d/%m/%Y") if not mau_trong else "...../...../........", False),
@@ -745,17 +759,21 @@ def ve_bao_gia(du_lieu, ct, mau_trong=False):
                 tong_hang += round(mh["so_luong"] * mh["don_gia"])
     dong_cuoi = b.r - 1
 
-    vat = _ty_le_vat(du_lieu.get("vat", 0.1))
     da_gom_vat = bool(du_lieu.get("gia_da_gom_vat"))
+    vat_nhap = du_lieu.get("vat")
+    if vat_nhap is None and not da_gom_vat:
+        vat_nhap = 0.1
+    vat = _ty_le_vat(vat_nhap) if vat_nhap is not None else None  # None: giá gồm VAT, không nêu thuế suất
     tien_thue = 0 if da_gom_vat else round(tong_hang * vat)
     tong_cong = tong_hang + tien_thue
     b.tong_tien(dong_dau, dong_cuoi, vat, None if mau_trong else tong_cong, da_gom_vat)
     dk = dict(du_lieu.get("dieu_khoan") or {})
     dk_zh = dict(du_lieu.get("dieu_khoan_zh") or {})
     if da_gom_vat:
-        dk.setdefault("thue", f"Đơn giá trên đã bao gồm thuế GTGT {vat:.0%}")
-        dk_zh.setdefault("thue", f"以上单价已含{vat:.0%}增值税")
-    b.dieu_khoan(dk, dk_zh, hieu_luc_ngay)
+        p = f"{vat:.0%}" if vat is not None else ""
+        dk.setdefault("thue", f"Đơn giá trên đã bao gồm thuế GTGT {p}".rstrip())
+        dk_zh.setdefault("thue", f"以上单价已含{p}增值税")
+    b.dieu_khoan(dk, dk_zh, hieu_luc_ngay, du_lieu.get("nhan_dieu_khoan") or {})
     b.cho_ky()
     b.hoan_thien(du_lieu.get("so_trang"))
 
